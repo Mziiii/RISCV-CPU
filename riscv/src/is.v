@@ -36,15 +36,10 @@ module is (
     reg [`NameBus] m_rs1,m_rs2,m_rd;
     reg [`ImmBus]  m_imm;
     
-    wire [6:0] opcode;
-    wire [2:0] funct3;
-    wire [3:0] funct;
-    wire stall;
-    
-    assign opcode = iINF_inst[6:0];
-    assign funct3 = iINF_inst[14:12];
-    assign funct  = {iINF_inst[30],iINF_inst[14:12]};
-    assign stall  = rst || !rdy || !iINF_en;
+    wire [6:0] opcode= iINF_inst[6:0];
+    wire [2:0] funct3 = iINF_inst[14:12];
+    wire [3:0] funct = {iINF_inst[30],iINF_inst[14:12]};
+    wire stall = rst || !rdy || !iINF_en;
     
     assign oREG_op        = m_op;
     assign oRS_op         = m_op;

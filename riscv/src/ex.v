@@ -6,95 +6,205 @@ module ex (
     input wire rdy,
 
     //rs
-    input wire iRS_en,
+    input wire            iRS_en,
     input wire [`AddrBus] iRS_pc,
-    input wire [`OpBus] iRS_op,
-    input wire [`ImmBus] iRS_imm,
+    input wire [`OpBus]   iRS_op,
+    input wire [`ImmBus]  iRS_imm,
     input wire [`NickBus] iRS_rd_nick,
     input wire [`DataBus] iRS_rs1_dt,
     input wire [`DataBus] iRS_rs2_dt,
 
-    //send ->RS/SLB/ROB
-    output wire            oRS_en,
-    output wire [`NickBus] oRS_nick,
-    output wire [`DataBus] oRS_dt,
-
-    output wire            oSLB_en,
-    output wire [`NickBus] oSLB_nick,
-    output wire [`DataBus] oSLB_dt,
-
-    output wire            oROB_en,
-    output wire [`NickBus] oROB_nick,
-    output wire [`DataBus] oROB_dt,
-    output wire            oROB_isBJ,
-    output wire [`AddrBus] oROB_j_pc
+    //check update
+    //-> rs
+    output reg            oRS_en,
+    output reg [`NickBus] oRS_nick,
+    output reg [`DataBus] oRS_dt,
+    //-> slb
+    output reg            oSLB_en,
+    output reg [`NickBus] oSLB_nick,
+    output reg [`DataBus] oSLB_dt,
+    //-> rob
+    output reg            oROB_en,
+    output reg [`NickBus] oROB_nick,
+    output reg [`DataBus] oROB_dt,
+    output reg            oROB_isBJ,
+    output reg [`AddrBus] oROB_j_pc
 );
-    
-    reg [`DataBus] dt;
-    reg [`NickBus] nick;
-    reg en;
-    reg [`AddrBus] pc;
-    reg has_j;
-    assign oROB_dt   = dt;
-    assign oSLB_dt   = dt;
-    assign oRS_dt    = dt;
-    assign oROB_j_pc = pc;
-    assign oRS_en    = en;
-    assign oROB_en   = en;
-    assign oSLB_en   = en;
-    assign oRS_nick  = iRS_rd_nick;
-    assign oSLB_nick = iRS_rd_nick;
-    assign oROB_nick = iRS_rd_nick;
-    assign oROB_isBJ = has_j;
-    
-    always @(*) begin
-        has_j = 0;
+  
+    always @(posedge clk) begin
         if (rst) ;
         else if (rdy) begin
         
         if (iRS_en) begin
-            en = 1'b1;
+            oRS_en  <= 1'b1;
+            oSLB_en <= 1'b1;
+            oROB_en <= 1'b1;
+            oRS_nick  <= iRS_rd_nick;
+            oSLB_nick <= iRS_rd_nick;
+            oROB_nick <= iRS_rd_nick;
             case(iRS_op)
-                `LUI:dt   = iRS_imm;
-                `AUIPC:dt = iRS_imm + iRS_pc;
-                
-                `BEQ:if(iRS_rs1_dt==iRS_rs2_dt) has_j = 1;
-                `BNE:if(iRS_rs1_dt!=iRS_rs2_dt) has_j = 1;
-                `BLT:if($signed(iRS_rs1_dt)<$signed(iRS_rs2_dt)) has_j = 1;
-                `BLTU:if(iRS_rs1_dt<iRS_rs2_dt) has_j = 1;
-                `BGE:if($signed(iRS_rs1_dt)>=$signed(iRS_rs2_dt)) has_j = 1;
-                `BGEU:if(iRS_rs1_dt>=iRS_rs2_dt) has_j = 1;
-                `JALR:begin
-                    dt = iRS_pc+4;
-                    pc = iRS_rs1_dt + iRS_imm;
+                `LUI:begin
+                    oRS_dt    <= iRS_imm;
+                    oROB_dt   <= iRS_imm;
+                    oSLB_dt   <= iRS_imm;
+                    oROB_isBJ <= 1'b0;
+                end
+                `AUIPC:begin
+                    oRS_dt    <= iRS_imm + iRS_pc;
+                    oROB_dt   <= iRS_imm + iRS_pc;
+                    oSLB_dt   <= iRS_imm + iRS_pc;
+                    oROB_isBJ <= 1'b0;
                 end
                 
-                `ADDI:dt  = iRS_rs1_dt + iRS_imm;
-                `SLLI:dt  = iRS_rs1_dt << iRS_imm[5:0];
-                `SLTI:dt  = {{31{1'b0}},$signed(iRS_rs1_dt) < $signed(iRS_imm)};
-                `SLTIU:dt = {{31{1'b0}},iRS_rs1_dt < iRS_imm};
-                `XORI:dt  = iRS_rs1_dt ^ iRS_imm;
-                `SRLI:dt  = iRS_rs1_dt >> iRS_imm[5:0];
-                `SRAI:dt  = $signed(iRS_rs1_dt) >> iRS_imm[5:0];
-                `ORI:dt   = iRS_rs1_dt | iRS_imm;
-                `ANDI:dt  = iRS_rs1_dt & iRS_imm;
+                `BEQ:if(iRS_rs1_dt==iRS_rs2_dt) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `BNE:if(iRS_rs1_dt!=iRS_rs2_dt) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `BLT:if($signed(iRS_rs1_dt)<$signed(iRS_rs2_dt)) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `BLTU:if(iRS_rs1_dt<iRS_rs2_dt) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `BGE:if($signed(iRS_rs1_dt)>=$signed(iRS_rs2_dt)) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `BGEU:if(iRS_rs1_dt>=iRS_rs2_dt) begin
+                    oROB_isBJ <= 1'b1;
+                    oROB_j_pc <= iRS_pc + iRS_imm;
+                end
+                `JALR:begin
+                    oROB_isBJ <= 1'b1;
+                    oRS_dt  <= iRS_pc + 4;
+                    oROB_dt <= iRS_pc + 4;
+                    oSLB_dt <= iRS_pc + 4;
+                    oROB_j_pc <= iRS_rs1_dt + iRS_imm;
+                end
                 
-                `ADD:dt  = iRS_rs1_dt + iRS_rs2_dt;
-                `SUB:dt  = iRS_rs1_dt - iRS_rs2_dt;
-                `SLL:dt  = iRS_rs1_dt << iRS_rs2_dt[5:0];
-                `SLT:dt  = {{31{1'b0}},$signed (iRS_rs1_dt) < $signed (iRS_rs2_dt)};
-                `SLTU:dt = {{31{1'b0}},iRS_rs1_dt < iRS_rs2_dt};
-                `XOR:dt  = iRS_rs1_dt ^ iRS_rs2_dt;
-                `SRL:dt  = iRS_rs1_dt >> iRS_rs2_dt[5:0];
-                `SRA:dt  = $signed(iRS_rs1_dt) >> iRS_rs2_dt[5:0];
-                `OR:dt   = iRS_rs1_dt | iRS_rs2_dt;
-                `AND:dt  = iRS_rs1_dt & iRS_rs2_dt;
+                `ADDI:begin
+                    oRS_dt    <= iRS_rs1_dt + iRS_imm;
+                    oROB_dt   <= iRS_rs1_dt + iRS_imm;
+                    oSLB_dt   <= iRS_rs1_dt + iRS_imm;
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLLI:begin
+                    oRS_dt    <= iRS_rs1_dt << iRS_imm[5:0];
+                    oROB_dt   <= iRS_rs1_dt << iRS_imm[5:0];
+                    oSLB_dt   <= iRS_rs1_dt << iRS_imm[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLTI:begin
+                    oRS_dt    <= {{31{1'b0}},$signed(iRS_rs1_dt) < $signed(iRS_imm)};
+                    oROB_dt   <= {{31{1'b0}},$signed(iRS_rs1_dt) < $signed(iRS_imm)};
+                    oSLB_dt   <= {{31{1'b0}},$signed(iRS_rs1_dt) < $signed(iRS_imm)};
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLTIU:begin
+                    oRS_dt    <= {{31{1'b0}},iRS_rs1_dt < iRS_imm};
+                    oROB_dt   <= {{31{1'b0}},iRS_rs1_dt < iRS_imm};
+                    oSLB_dt   <= {{31{1'b0}},iRS_rs1_dt < iRS_imm};
+                    oROB_isBJ <= 1'b0;
+                end
+                `XORI:begin
+                    oRS_dt    <= iRS_rs1_dt ^ iRS_imm;
+                    oROB_dt   <= iRS_rs1_dt ^ iRS_imm;
+                    oSLB_dt   <= iRS_rs1_dt ^ iRS_imm;
+                    oROB_isBJ <= 1'b0;
+                end
+                `SRLI:begin
+                    oRS_dt    <= iRS_rs1_dt >> iRS_imm[5:0];
+                    oROB_dt   <= iRS_rs1_dt >> iRS_imm[5:0];
+                    oSLB_dt   <= iRS_rs1_dt >> iRS_imm[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `SRAI:begin
+                    oRS_dt    <= $signed(iRS_rs1_dt) >> iRS_imm[5:0];
+                    oROB_dt   <= $signed(iRS_rs1_dt) >> iRS_imm[5:0];
+                    oSLB_dt   <= $signed(iRS_rs1_dt) >> iRS_imm[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `ORI:begin
+                    oRS_dt    <= iRS_rs1_dt | iRS_imm;
+                    oROB_dt   <= iRS_rs1_dt | iRS_imm;
+                    oSLB_dt   <= iRS_rs1_dt | iRS_imm;
+                    oROB_isBJ <= 1'b0;
+                end
+                `ANDI:begin
+                    oRS_dt    <= iRS_rs1_dt & iRS_imm;
+                    oROB_dt   <= iRS_rs1_dt & iRS_imm;
+                    oSLB_dt   <= iRS_rs1_dt & iRS_imm;
+                    oROB_isBJ <= 1'b0;
+                end
+                
+                `ADD:begin
+                    oRS_dt    <= iRS_rs1_dt + iRS_rs2_dt;
+                    oROB_dt   <= iRS_rs1_dt + iRS_rs2_dt;
+                    oSLB_dt   <= iRS_rs1_dt + iRS_rs2_dt;
+                    oROB_isBJ <= 1'b0;
+                end
+                `SUB:begin
+                    oRS_dt    <= iRS_rs1_dt - iRS_rs2_dt;
+                    oROB_dt   <= iRS_rs1_dt - iRS_rs2_dt;
+                    oSLB_dt   <= iRS_rs1_dt - iRS_rs2_dt;
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLL:begin
+                    oRS_dt    <= iRS_rs1_dt << iRS_rs2_dt[5:0];
+                    oROB_dt   <= iRS_rs1_dt << iRS_rs2_dt[5:0];
+                    oSLB_dt   <= iRS_rs1_dt << iRS_rs2_dt[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLT:begin
+                    oRS_dt    <= {{31{1'b0}},$signed (iRS_rs1_dt) < $signed (iRS_rs2_dt)};
+                    oROB_dt   <= {{31{1'b0}},$signed (iRS_rs1_dt) < $signed (iRS_rs2_dt)};
+                    oSLB_dt   <= {{31{1'b0}},$signed (iRS_rs1_dt) < $signed (iRS_rs2_dt)};
+                    oROB_isBJ <= 1'b0;
+                end
+                `SLTU:begin
+                    oRS_dt    <= {{31{1'b0}},iRS_rs1_dt < iRS_rs2_dt};
+                    oROB_dt   <= {{31{1'b0}},iRS_rs1_dt < iRS_rs2_dt};
+                    oSLB_dt   <= {{31{1'b0}},iRS_rs1_dt < iRS_rs2_dt};
+                    oROB_isBJ <= 1'b0;
+                end
+                `XOR:begin
+                    oRS_dt    <= iRS_rs1_dt ^ iRS_rs2_dt;
+                    oROB_dt   <= iRS_rs1_dt ^ iRS_rs2_dt;
+                    oSLB_dt   <= iRS_rs1_dt ^ iRS_rs2_dt;
+                    oROB_isBJ <= 1'b0;
+                end
+                `SRL:begin
+                    oRS_dt    <= iRS_rs1_dt >> iRS_rs2_dt[5:0];
+                    oROB_dt   <= iRS_rs1_dt >> iRS_rs2_dt[5:0];
+                    oSLB_dt   <= iRS_rs1_dt >> iRS_rs2_dt[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `SRA:begin
+                    oRS_dt    <= $signed(iRS_rs1_dt) >> iRS_rs2_dt[5:0];
+                    oROB_dt   <= $signed(iRS_rs1_dt) >> iRS_rs2_dt[5:0];
+                    oSLB_dt   <= $signed(iRS_rs1_dt) >> iRS_rs2_dt[5:0];
+                    oROB_isBJ <= 1'b0;
+                end
+                `OR:begin
+                    oRS_dt    <= iRS_rs1_dt | iRS_rs2_dt;
+                    oROB_dt   <= iRS_rs1_dt | iRS_rs2_dt;
+                    oSLB_dt   <= iRS_rs1_dt | iRS_rs2_dt;
+                    oROB_isBJ <= 1'b0;
+                end
+                `AND:begin
+                    oRS_dt    <= iRS_rs1_dt & iRS_rs2_dt;
+                    oROB_dt   <= iRS_rs1_dt & iRS_rs2_dt;
+                    oSLB_dt   <= iRS_rs1_dt & iRS_rs2_dt;
+                    oROB_isBJ <= 1'b0;
+                end
                 default;
             endcase
-            if (has_j) begin
-                pc = iRS_pc+iRS_imm;
-            end
-            if (iRS_op == `JALR) has_j = 1;
         end
     end
     end

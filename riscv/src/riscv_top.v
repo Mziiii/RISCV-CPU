@@ -166,4 +166,9 @@ assign cpu_ram_din 	= (q_hci_io_en)  ? hci_io_dout 	 : ram_dout;
 
 assign hci_ram_din 	= ram_dout;
 
+initial begin
+	$dumpfile("a.vcd");
+	$dumpvars(0, riscv_top);
+end
+
 endmodule

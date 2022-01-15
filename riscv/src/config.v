@@ -17,6 +17,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
+//todo:delete extra ones
 
 `define ZERO_WORD 32'h00000000
 `define ONE_WORD  32'hffffffff
@@ -28,7 +29,27 @@
 `define RegLen     32
 `define RegNum     32
 
+//ram
+`define MemAddrBus 16:0
+`define MemDataBus 7:0
+`define DataC      1'b1
+`define InstC      1'b0
+`define Write      1'b1
+`define Read       1'b0
+//reg
+`define RegNumBus `RegNum-1:0
+
+//iCahche
+`define ICacheNum    9
+`define ICacheNumBus `ICacheNum-1:0 
+`define ICacheBus    2**`ICacheNum-1:0
+`define ICacheIdxBus 10:2
+`define ICacheTagBus 17:11
+`define ICacheTag    6:0
+
+//Rob
 `define RobNum     32 //NickBus
+`define RobBus     `RobNum-1:0
 
 //Bus
 `define InstBus    31:0
@@ -46,11 +67,16 @@
 `define FIFOLen 32
 
 //slb
-`define SLBNum 32
+`define SLBNum 32 // the same with ROB to avoid full:)
+`define SLBNumBus `SLBNum-1:0
 `define SLBBus 4:0
+`define LenBus 2:0 //store & load W/H/B...->1/2/4
+`define Store 1'b1
+`define Load  1'b0
 
 //rs 
-`define RSNum 32
+`define RSNum 32 // the same with ROB to avoid full:)
+`define RSNumBus `RSNum-1:0
 `define RSBus 4:0
 
 //regfile 

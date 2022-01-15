@@ -6,14 +6,13 @@ module inf (
     input wire rdy,
 
     //ic
-    output reg oIC_en,
+    output reg             oIC_en,
     output wire [`AddrBus] oIC_pc,
     //
-    input wire iIC_en,
+    input wire            iIC_en,
     input wire [`InstBus] iIC_inst,
-    input wire [`AddrBus] iIC_pc,
-    //is
-    output reg oIS_en,
+    //just to guarantee the order
+    output reg             oIS_en,
     output wire [`AddrBus] oIS_pc,
     output wire [`InstBus] oIS_inst,
 
@@ -21,9 +20,9 @@ module inf (
     input wire iROB_full,
 
     //bp
-    output reg oBP_en,
+    output reg             oBP_en,
     output wire [`AddrBus] oBP_pc,
-    input wire iBP_en,
+    input wire             iBP_en,
     input wire [`AddrBus] iBP_nxpc
 );
     reg [`AddrBus] PC;
@@ -67,7 +66,7 @@ module inf (
             q_data_inst[q_wr_ptr] <= d_data_inst;
             q_data_pc[q_wr_ptr]   <= d_data_pc;
             PC                    <= iBP_nxpc;
-            if (iIC_pc[6:0] == 7'b1101111) begin  // JAL
+            if (iIC_inst[6:0] == 7'b1101111) begin  // JAL
                 PC <= PC + {{12{iIC_inst[31]}},
                 iIC_inst[19: 12],
                 iIC_inst[20],
@@ -83,7 +82,7 @@ module inf (
             // Handle writes.
             assign d_wr_ptr    = (wr_en_prot)  ? q_wr_ptr + 1'h1 : q_wr_ptr;
             assign d_data_inst = (wr_en_prot)  ? iIC_inst        : q_data_inst[q_wr_ptr];
-            assign d_data_pc   = (wr_en_prot)  ? iIC_pc          : q_data_pc[q_wr_ptr];
+            assign d_data_pc   = (wr_en_prot)  ? PC              : q_data_pc[q_wr_ptr];
             
             // Handle reads.
             assign d_rd_ptr = (rd_en_prot)  ? q_rd_ptr + 1'h1 : q_rd_ptr;
