@@ -5,54 +5,30 @@ module rob (
     input wire rst,
     input wire rdy,
 
-    output reg oRF_nick_en,
-    output reg [`NickBus] oRF_nick_latest,
-    
-    //regfile->rs/slb
-    //regfile
-    input wire            iRF_en,
-    input wire [`OpBus]   iRF_op,
-    input wire [`AddrBus] iRF_pc,
-    input wire [`ImmBus]  iRF_imm,
-    input wire [`NickBus] iRF_rd_nick,
-    /* input wire            iRF_rs1_valid,*/
-    input wire [`NickBus] iRF_rs1_nick,
-    input wire [`DataBus] iRF_rs1_dt,
-    /* input wire            iRF_rs2_valid,*/
-    input wire [`NickBus] iRF_rs2_nick,
-    input wire [`DataBus] iRF_rs2_dt,
+    output reg clr,
+    output reg [`AddrBus] oINF_j_pc,
 
-    //select to rs(copy)
-    output reg            oRS_en,
-    output reg [`OpBus]   oRS_op,
-    output reg [`AddrBus] oRS_pc,
-    output reg [`ImmBus]  oRS_imm,
-    output reg [`NickBus] oRS_rd_nick,
-    /* output wire            oRS_rs1_valid,*/
-    output reg [`NickBus] oRS_rs1_nick,
-    output reg [`DataBus] oRS_rs1_dt,
-    /* output wire            oRS_rs2_valid,*/
-    output reg [`NickBus] oRS_rs2_nick,
-    output reg [`DataBus] oRS_rs2_dt,
+    //inf 
+    output reg            oINF_full,
 
-    //select to slb(copy)
-    output reg            oSLB_en,
-    output reg [`OpBus]   oSLB_op,
-    output reg [`AddrBus] oSLB_pc,
-    output reg [`ImmBus]  oSLB_imm,
-    output reg [`NickBus] oSLB_rd_nick,
-    /*output wire            oSLB_rs1_valid,*/
-    output reg [`NickBus] oSLB_rs1_nick,
-    output reg [`DataBus] oSLB_rs1_dt,
-    /* output wire            oSLB_rs2_valid,*/
-    output reg [`NickBus] oSLB_rs2_nick,
-    output reg [`DataBus] oSLB_rs2_dt,
+    input wire            iDP_nick_en,
+    //send nick to dispatch
+    output reg            oDP_nick_en,
+    output reg [`NickBus] oDP_nick,
+
+
+    //dispatch to rs/slb
+    input wire            iDP_en,
+    input wire [`OpBus]   iDP_op,
+    input wire [`NickBus] iDP_rd_nick,
+    input wire            iDP_pd,
+
 
     //ex
     input wire            iEX_en,
     input wire [`NickBus] iEX_nick,
     input wire [`DataBus] iEX_dt,
-    input wire            iEX_isBJ,
+    input wire            iEX_ac,
     input wire [`AddrBus] iEX_j_pc,
 
     //slb
@@ -64,138 +40,121 @@ module rob (
     output reg            oSLB_commit_en,//todo:output 
     output reg [`NickBus] oSLB_commit_nick,
 
-    //
+    //commit: write back to regfile 
     output reg            oRF_en,
     output reg [`NameBus] oRF_rd_regnm,
     output reg [`DataBus] oRF_rd_dt,
-    output reg [`NickBus] oRF_rd_nick,
-
-    //inf 
-    output reg oINF_full,
-
-    output reg oSLB_wrong,
-    output reg oRF_wrong
+    output reg [`NickBus] oRF_rd_nick
 );
     
-    reg [`NickBus] nick_latest;
-    
-    assign oRF_nick_latest = nick_latest;
-    
     //fifo
+    reg [`RobBus] occupied;
     reg commit[`RobBus];
-    reg [`NameBus] regnm_fifo[`RobBus];
-    reg [`DataBus] dt_fifo[`RobBus];
-    reg ls_fifo[`RobBus];
-    reg isBJ_fifo[`RobBus];
-    reg full,empty;
-    reg [`NickBus] tail,head;
+    reg [`NameBus] regnm[`RobBus];
+    reg [`DataBus] dt[`RobBus];
+    reg ls[`RobBus];//load_store
+    reg ac[`RobBus];//actually
+    reg pd[`RobBus];//preditcted
+    reg [`AddrBus] j_pc[`RobBus];//jumped_pc
     
-    reg [`NameBus] regnm_top;
-    reg [`DataBus] dt_top;
-    reg ls_top;
-    reg isBJ_top;
+    reg [`NickBus] rd_ptr,wt_ptr;
+    wire full  = &occupied;
+    wire empty = !(|occupied);
     
-    wire [`NickBus] tail_nxt,head_nxt;
-    assign tail_nxt = (tail == 5'b11111)?1:tail+1;
-    assign head_nxt = (head == 5'b11111)?1:head+1;
+    wire [`NickBus] rd_nx_ptr,wt_nx_ptr;
+    assign rd_nx_ptr = (rd_ptr == 5'b11111)?1:rd_ptr+1;
+    assign wt_nx_ptr = (wt_ptr == 5'b11111)?1:wt_ptr+1;
+
     integer i;
+
+    //dispatch and commit
+    always @(*) begin
+        if(rst) begin
+            oINF_full = 1'b0;
+            oDP_nick_en    = 1'b0;
+            oDP_nick  = 0;
+            wt_ptr    = 1;
+        end 
+        else if(rdy) begin
+            oINF_full = full;
+            if(iDP_nick_en&&!full) begin
+                oDP_nick_en = 1'b1;
+                oDP_nick = rd_ptr;
+                wt_ptr = wt_nx_ptr;
+            end
+        end
+    end
+
     always @(posedge clk) begin
         if (rst) begin
-            for(i = 0;i<`RobNum;i = i+1) begin
-                regnm_fifo[i] <= 0;
-                dt_fifo[i]    <= 0;
+            for(i = 0; i < `RobNum; i = i + 1) begin
+                regnm[i] <= 0;
+                dt[i]    <= 0;
                 commit[i]     <= 1'b0;
+                j_pc[i]  <= 0;
+                ac[i]    <= `NotJump;
+                pd[i]    <= `NotJump;
+                ls[i]    <= 1'b0;
             end
-            head        <= 1;
-            tail        <= 1;
-            full        <= 1'b0;
-            empty       <= 1'b1;
-            nick_latest <= 1;
+            occupied       <= 0;
+            rd_ptr         <= 1;
+            //output
+            clr            <= 1'b0;
+            oRF_en         <= 1'b0;
+            oSLB_commit_en <= 1'b0;
         end
         else if (rdy) begin
-            if (iRF_en)begin
-                case(iRF_op)
-                    `SB,
-                    `SH,
-                    `SW:begin
-                        oSLB_en              <= 1'b1;
-                        oSLB_imm             <= iRF_imm;
-                        oSLB_op              <= iRF_op;
-                        oSLB_pc              <= iRF_pc;
-                        oSLB_rd_nick         <= iRF_rd_nick;
-                        oSLB_rs1_dt          <= iRF_rs1_dt;
-                        oSLB_rs1_nick        <= iRF_rs1_nick;
-                        oSLB_rs2_dt          <= iRF_rs2_dt;
-                        oSLB_rs2_nick        <= iRF_rs2_nick;
-                        oRS_en               <= 1'b0;
-                        ls_fifo[iRF_rd_nick] <= `Store;
-                    end
-                    `LB,
-                    `LH,
-                    `LW,
-                    `LBU,
-                    `LHU:begin
-                        oSLB_en       <= 1'b1;
-                        oSLB_imm      <= iRF_imm;
-                        oSLB_op       <= iRF_op;
-                        oSLB_pc       <= iRF_pc;
-                        oSLB_rd_nick  <= iRF_rd_nick;
-                        oSLB_rs1_dt   <= iRF_rs1_dt;
-                        oSLB_rs1_nick <= iRF_rs1_nick;
-                        oSLB_rs2_dt   <= iRF_rs2_dt;
-                        oSLB_rs2_nick <= iRF_rs2_nick;
-                        oRS_en        <= 1'b0;
-                    end
-                    default:begin
-                        oRS_en       <= 1'b1;
-                        oRS_op       <= iRF_op;
-                        oRS_pc       <= iRF_pc;
-                        oRS_imm      <= iRF_imm;
-                        oRS_rd_nick  <= iRF_rd_nick;
-                        oRS_rs1_dt   <= iRF_rs1_dt;
-                        oRS_rs1_nick <= iRF_rs1_nick;
-                        oRS_rs2_dt   <= iRF_rs2_dt;
-                        oRS_rs2_nick <= iRF_rs2_nick;
-                        oSLB_en      <= 1'b0;
-                    end
+
+            if(iDP_en) begin
+                occupied[iDP_rd_nick] <= 1'b1;
+                pd[iDP_rd_nick] <= iDP_pd;
+                case(iDP_op) 
+                `SB,
+                `SH,
+                `SW:
+                ls[iDP_rd_nick] <= `Store;
+                default;
                 endcase
             end
             
-            if (!empty && commit[head]) begin
-                if (ls_fifo[head]) begin
+            if (!empty && commit[rd_ptr]) begin
+                if (ls[rd_ptr]) begin
                     oRF_en           <= 1'b0;
                     oSLB_commit_en   <= 1'b1;
-                    oSLB_commit_nick <= head;
-                    commit[head]     <= 1'b0;
+                    oSLB_commit_nick <= rd_ptr;
+                    commit[rd_ptr]   <= 1'b0;
+                    occupied[rd_ptr] <= 1'b0;
                 end
-                else begin//read from fifo when !empty
+                else begin
+                    //read from fifo when !empty
                     oSLB_commit_en <= 1'b0;
                     oRF_en         <= 1'b1;
-                    oRF_rd_dt      <= dt_fifo[head];
-                    oRF_rd_nick    <= head;
-                    oRF_rd_regnm   <= regnm_fifo[head];
-                    if (head == tail&&!iRF_en) begin
-                        empty <= 1'b0;
+                    oRF_rd_dt      <= dt[rd_ptr];
+                    oRF_rd_nick    <= rd_ptr;
+                    oRF_rd_regnm   <= regnm[rd_ptr];
+                    if (empty) begin//empty
+                    
+                        end else rd_ptr <= rd_nx_ptr;
+                        commit[rd_ptr]  <= 1'b0;
+                        if (pd[rd_ptr] != ac[rd_ptr]) begin
+                            clr       <= 1'b1;//
+                            //todo: reset!!!!!!
+                            oINF_j_pc <= j_pc[rd_ptr];
+                        end
                     end
-                    else begin
-                        head <= head_nxt;
-                    end
-                    commit[head] <= 1'b0;
+                    end else begin
+
                 end
-                end else begin
-                oRF_en  <= 1'b0;
-                oSLB_en <= 1'b0;
-            end
                 if (iEX_en) begin
-                    dt_fifo[iEX_nick]   <= iEX_dt;
-                    isBJ_fifo[iEX_nick] <= iEX_isBJ;
+                    dt[iEX_nick]   <= iEX_dt;
+                    ac[iEX_nick]   <= iEX_ac;
                     commit[iEX_nick]    <= 1'b1;
+                    j_pc[iEX_nick] <= iEX_j_pc;
                 end
-                    if (iSLB_en) begin
-                        dt_fifo[iSLB_nick] <= iSLB_dt;
-                        commit[iSLB_nick]  <= 1'b1;
-                    end
+                if (iSLB_en) begin
+                    dt[iSLB_nick] <= iSLB_dt;
+                    commit[iSLB_nick]  <= 1'b1;
+                end
+            end
         end
-    end
-endmodule  
-            //todo: full!
+    endmodule

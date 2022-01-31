@@ -5,9 +5,12 @@ module dcache (
     input wire rst,
     input wire rdy,
 
+    input wire [`WaitBus] iMC_wait,
+
     //memctrl
-    input wire            iMC_en,
+    input wire            iMC_done,
     input wire [`DataBus] iMC_dt,
+    
     output reg            oMC_en,
     output reg            oMC_ls,
     output reg [`AddrBus] oMC_pc,
@@ -40,26 +43,26 @@ reg [`NickBus] nick;
             nick      <= 0;
         end
         else if (rdy) begin
-            if (iMC_en) begin
+            if (iMC_done) begin
                 oSLB_en   <= 1'b1;
                 oSLB_dt   <= iMC_dt;
                 oSLB_nick <= nick;
-                end 
-                else begin
+            end 
+            else begin
                 oSLB_en <= 1'b0;
             end
-                if (iSLB_en) begin
-                    oMC_en   <= 1'b1;
-                    oMC_ls   <= iSLB_ls;
-                    oMC_len  <= iSLB_len;
-                    oMC_pc   <= iSLB_pc;
-                    oMC_dt   <= iSLB_dt;
-                    nick     <= iSLB_nick;
-                end
-                else begin
-                    oMC_en <= 1'b0;
-                end
-        end
+            if (iSLB_en) begin
+                oMC_en   <= 1'b1;
+                oMC_ls   <= iSLB_ls;
+                oMC_len  <= iSLB_len;
+                oMC_pc   <= iSLB_pc;
+                oMC_dt   <= iSLB_dt;
+                nick     <= iSLB_nick;
             end
+            else begin
+                oMC_en <= 1'b0;
+            end
+        end
+    end
             
-            endmodule
+endmodule

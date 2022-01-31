@@ -5,16 +5,18 @@
     input wire rst,
     input wire rdy,
 
+    input wire clr,
+
     //rob (if en absolutely can write)
-    input wire            iROB_en,
-    input wire [`OpBus]   iROB_op,
-    input wire [`AddrBus] iROB_pc,
-    input wire [`ImmBus]  iROB_imm,
-    input wire [`NickBus] iROB_rd_nick,
-    input wire [`NickBus] iROB_rs1_nick,
-    input wire [`DataBus] iROB_rs1_dt,
-    input wire [`NickBus] iROB_rs2_nick,
-    input wire [`DataBus] iROB_rs2_dt,
+    input wire            iDP_en,
+    input wire [`OpBus]   iDP_op,
+    input wire [`AddrBus] iDP_pc,
+    input wire [`ImmBus]  iDP_imm,
+    input wire [`NickBus] iDP_rd_nick,
+    input wire [`NickBus] iDP_rs1_nick,
+    input wire [`DataBus] iDP_rs1_dt,
+    input wire [`NickBus] iDP_rs2_nick,
+    input wire [`DataBus] iDP_rs2_dt,
 
     //check update
     //ex calculate 
@@ -40,8 +42,6 @@
     output reg [`NickBus] oROB_nick,
     output reg [`DataBus] oROB_dt,
 
-    input wire iROB_wrong,//todo:predictor
-
     //execute ST!
     input wire            iROB_commit_en,
     input wire [`NickBus] iROB_commit_nick,
@@ -56,7 +56,9 @@
     //back LD
     input wire            iDC_en,//have data!
     input wire [`NickBus] iDC_nick,
-    input wire [`DataBus] iDC_dt
+    input wire [`DataBus] iDC_dt,
+
+    output reg oINF_full
  );
     
     //contents in fifo
@@ -73,9 +75,10 @@
     reg [`SLBNumBus] rs1_valid,rs2_valid;
     
     wire empty = &(~occupied);
+    wire full = &occupied;
     wire valid = |(occupied&rs1_valid&rs2_valid);
     //
-    wire [`RSBus] idx = iROB_rd_nick;
+    wire [`RSBus] idx = iDP_rd_nick;
     
     integer i;
     always @(posedge clk) begin
@@ -92,8 +95,10 @@
                 rs1_valid[i]<= 1'b0;
                 rs2_valid[i]<= 1'b0;
             end
+            occupied <= 0;
         end
         else if (rdy) begin
+            oINF_full <= full;
             if (iEX_en) begin
                     for(i = 0;i<`RSNum;i = i+1) begin
                         if (occupied[i] == 1'b1) begin
@@ -160,9 +165,9 @@
                         oDC_dt<=rs2_dt[iROB_commit_nick];
                         oDC_nick<=iROB_commit_nick;
                         case (op[iROB_commit_nick])
-                            `SB: oDC_len<=1;
-                            `SH:oDC_len<=2;
-                            `SW:oDC_len<=4;
+                            `SB: oDC_len <= `One;
+                            `SH:oDC_len <= `Two;
+                            `SW:oDC_len <=`Four;
                             default; 
                         endcase
                         rs1_valid[iROB_commit_nick]<=1'b0;
@@ -188,10 +193,10 @@
                             oDC_addr<=rs1_dt[i]+imm[i];
                             case (op[i])
                                 `LB,
-                                `LBU:oDC_len<=1;
+                                `LBU:oDC_len <= `One;
                                 `LH,
-                                `LHU:oDC_len<=2;
-                                `LW:oDC_len<=4; 
+                                `LHU:oDC_len <= `Two;
+                                `LW:oDC_len <= `Four; 
                                 default; 
                             endcase
                         end
@@ -199,18 +204,18 @@
                 end
             end
 
-            if (iROB_en) begin
+            if (iDP_en) begin
                 occupied[idx] <= 1'b1;
-                op[idx]       <= iROB_op;
-                pc[idx]       <= iROB_pc;
-                imm[idx]      <= iROB_imm;
-                rs1_nick[idx] <= iROB_rs1_nick;
-                rs2_nick[idx] <= iROB_rs2_nick;
-                rs1_dt[idx]   <= iROB_rs1_dt;
-                rs2_dt[idx]   <= iROB_rs2_dt;
-                rs1_valid[idx]<= iROB_rs1_nick == 0?1'b0:1'b1;
-                rs2_valid[idx]<= iROB_rs2_nick == 0?1'b0:1'b1;
-                case (iROB_op)
+                op[idx]       <= iDP_op;
+                pc[idx]       <= iDP_pc;
+                imm[idx]      <= iDP_imm;
+                rs1_nick[idx] <= iDP_rs1_nick;
+                rs2_nick[idx] <= iDP_rs2_nick;
+                rs1_dt[idx]   <= iDP_rs1_dt;
+                rs2_dt[idx]   <= iDP_rs2_dt;
+                rs1_valid[idx]<= iDP_rs1_nick == 0?1'b0:1'b1;
+                rs2_valid[idx]<= iDP_rs2_nick == 0?1'b0:1'b1;
+                case (iDP_op)
                     `SB,
                     `SH,
                     `SW:ls[idx]      <= `Store;
@@ -218,6 +223,6 @@
                 endcase
             end
         end
-            end
+    end
             
-            endmodule
+endmodule

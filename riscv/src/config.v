@@ -36,6 +36,18 @@
 `define InstC      1'b0
 `define Write      1'b1
 `define Read       1'b0
+`define PCStep     32'h00000001
+`define Zero       3'b000
+`define One        3'b001
+`define Two        3'b010
+`define Three      3'b011
+`define Four       3'b100
+`define Done       3'b101
+`define Stall      3'b110
+`define WaitBus    1:0
+
+`define Idle 1'b0
+`define Waiting 1'b1
 //reg
 `define RegNumBus `RegNum-1:0
 
@@ -49,7 +61,7 @@
 
 //Rob
 `define RobNum     32 //NickBus
-`define RobBus     `RobNum-1:0
+`define RobBus     `RobNum-1:1
 
 //Bus
 `define InstBus    31:0
@@ -62,13 +74,18 @@
 `define NameBus    4:0 //RegName
 `define NickBus    4:0 //RegNickName
 
+//pc
+`define Jump 1'b1
+`define NotJump 1'b0
+
 //inf
 `define FIFOBus 4:0
-`define FIFOLen 32
+`define FIFOLen 5
+`define FIFOLenBus 2**`FIFOLen-1:0
 
 //slb
 `define SLBNum 32 // the same with ROB to avoid full:)
-`define SLBNumBus `SLBNum-1:0
+`define SLBNumBus `SLBNum-1:1
 `define SLBBus 4:0
 `define LenBus 2:0 //store & load W/H/B...->1/2/4
 `define Store 1'b1
@@ -76,7 +93,7 @@
 
 //rs 
 `define RSNum 32 // the same with ROB to avoid full:)
-`define RSNumBus `RSNum-1:0
+`define RSNumBus `RSNum-1:1
 `define RSBus 4:0
 
 //regfile 
@@ -94,74 +111,6 @@
 
 `define RAM_SIZE 100
 `define RAM_SIZELOG2 17
-
-//OPCODE
-`define OpLen      7
-`define INST_LUI   7'b0110111
-`define INST_AUIPC 7'b0010111
-`define INST_JAL   7'b1101111
-`define INST_JAIR  7'b1100111
-`define INST_BOP   7'b1100011
-`define INST_LOP   7'b0000011
-`define INST_SOP   7'b0100011
-`define INST_IOP   7'b0010011
-`define INST_ROP   7'b0110011
-
-//BOP
-`define BOpLen      3
-`define INST_BEQ    3'b000
-`define INST_BNE    3'b001
-`define INST_BLT    3'b100
-`define INST_BGE    3'b101
-`define INST_BLTU   3'b110
-`define INST_BGEU   3'b111
-
-//LOP
-`define LOpLen      3
-`define INST_LB     3'b000
-`define INST_LH     3'b001
-`define INST_LW     3'b010
-`define INST_LBU    3'b100
-`define INST_LHU    3'b101
-
-//SOP
-`define SOpLen      3
-`define INST_SB     3'b000
-`define INST_SH     3'b001
-`define INST_SW     3'b010
-
-//IOP
-`define IOpLen      4
-`define INST_ADDI   4'b0000
-`define INST_SLTI   4'b0010
-`define INST_SLTIU  4'b0011
-`define INST_XORI   4'b0100
-`define INST_ORI    4'b0110
-`define INST_ANDI   4'b0111
-`define INST_SLLI   4'b0001
-`define INST_SRLI   4'b0101
-`define INST_SRAI   4'b1101
-
-//ROP
-`define ROpLen      4
-`define INST_ADD    4'b0000
-`define INST_SUB    4'b1000
-`define INST_SLL    4'b0001
-`define INST_SLT    4'b0010
-`define INST_SLTU   4'b0011
-`define INST_XOR    4'b0100
-`define INST_SRL    4'b0101
-`define INST_SRA    4'b1101
-`define INST_OR     4'b0110
-`define INST_AND    4'b0111
-
-//AluOP
-`define OpCodeLen 4
-`define EXE_OR    4'b0110
-
-//AluSelect
-`define OpSelLen 3
-`define LOGIC_OP 3'b001
 
 //OP
 `define OpBus      5:0
