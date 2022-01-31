@@ -14,44 +14,43 @@ module cpu(
 	
 	input  wire                 io_buffer_full, // 1 if uart buffer is full
 	
-	output wire [31:0]			dbgreg_dout		// cpu register output (debugging demo)
+	output wire [31:0]			    dbgreg_dout		// cpu register output (debugging demo)
 );
 
-// implementation goes here
-
-// Specifications:
-// - Pause cpu(freeze pc, registers, etc.) when rdy_in is low
-// - Memory read result will be returned in the next cycle. Write takes 1 cycle(no need to wait)
-// - Memory is of size 128KB, with valid address ranging from 0x0 to 0x20000
-// - I/O port is mapped to address higher than 0x30000 (mem_a[17:16]==2'b11)
-// - 0x30000 read: read a byte from input
-// - 0x30000 write: write a byte to output (write 0x00 is ignored)
-// - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
-// - 0x30004 write: indicates program stop (will output '\0' through uart tx)
-
-// always @(posedge clk_in)
-//   begin
-//     if (rst_in)
-//       begin
-      
-//       end
-//     else if (!rdy_in)
-//       begin
-      
-//       end
-//     else
-//       begin
-      
-//       end
-//   end
-    wire ic_bp_en;
-    wire bp_inf_en;
-    wire inf_bp_en;
-    wire [`InstBus] ic_bp_inst;
-    wire [`AddrBus] inf_bp_pc;
-    wire [`AddrBus] bp_inf_ppc;
+    // implementation goes here
     
-    wire mc_dc_en;
+    // Specifications:
+    // - Pause cpu(freeze pc, registers, etc.) when rdy_in is low
+    // - Memory read result will be returned in the next cycle. Write takes 1 cycle(no need to wait)
+    // - Memory is of size 128KB, with valid address ranging from 0x0 to 0x20000
+    // - I/O port is mapped to address higher than 0x30000 (mem_a[17:16] == 2'b11)
+    // - 0x30000 read: read a byte from input
+    // - 0x30000 write: write a byte to output (write 0x00 is ignored)
+    // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
+    // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
+    
+    // always @(posedge clk_in)
+    //   begin
+    //     if (rst_in)
+    //       begin
+    
+    //       end
+    //     else if (!rdy_in)
+    //       begin
+    
+    //       end
+    //     else
+    //       begin
+    
+    //       end
+    //   end
+    wire clr;
+
+    wire mc_bp_en;
+    wire [`InstBus] mc_bp_inst;
+    wire bp_inf_pd;
+    
+    wire mc_dc_done;
     wire [`DataBus] mc_dc_dt;
     wire dc_mc_en;
     wire dc_mc_ls;
@@ -84,80 +83,64 @@ module cpu(
     wire ex_rob_en;
     wire [`NickBus] ex_rob_nick;
     wire [`DataBus] ex_rob_dt;
-    wire ex_rob_isBJ;
+    wire ex_rob_ac;
     wire [`AddrBus] ex_rob_j_pc;
-    
-    wire mc_ic_en;
-    wire [`InstBus] mc_ic_inst;
-    wire ic_mc_en;
-    wire [`AddrBus] ic_mc_pc;
-    wire inf_ic_en;
-    wire [`AddrBus] inf_ic_pc;
-    wire ic_inf_en;
-    wire [`InstBus] ic_inf_inst;
-    
-    wire inf_is_en;
-    wire [`AddrBus] inf_is_pc;
-    wire [`InstBus] inf_is_inst;
+
+    wire [`AddrBus] rob_inf_j_pc;
+
     wire rob_inf_full;
-    
-    wire is_reg_en;
-    wire [`NameBus] is_reg_rs1_regnm;
-    wire [`NameBus] is_reg_rs2_regnm;
-    wire [`NameBus] is_reg_rd_regnm;
-    wire [`OpBus] is_reg_op;
-    wire [`AddrBus] is_reg_pc;
-    wire [`ImmBus] is_reg_imm;
-    wire is_rs_en;
-    wire [`OpBus] is_rs_op;
-    wire [`AddrBus] is_rs_pc;
-    wire [`ImmBus] is_rs_imm;
-    wire is_rob_en;
-    wire [`NameBus] is_rob_rd_regnm;
-    wire [`AddrBus] is_rob_pc;
-    
-    wire mc_ram_en;
-    wire mc_ram_rw;
-    wire [`AddrBus] mc_ram_addr;
-    wire [`MemDataBus] mc_ram_dt;
-    wire [`MemDataBus] ram_mc_dt;
-    
-    wire rob_rf_nick_en;
-    wire [`NameBus] rob_rf_nick_l;
+    wire slb_inf_full;
+    wire rs_inf_full;
+
+    wire [`WaitBus] mc_inf_wait;
+    wire [`WaitBus] mc_dc_wait;
+
+    wire mc_inf_done;
+    wire [`InstBus] mc_inf_inst;
+    wire inf_mc_en;
+    wire [`AddrBus] inf_mc_pc;
+
+    wire inf_ind_en;
+    wire [`InstBus] inf_ind_inst;
+    wire [`AddrBus] inf_ind_pc;
+    wire inf_ind_pd;
+       
+    wire ind_dp_en;
+    wire [`NameBus] ind_dp_rs1_regnm;
+    wire [`NameBus] ind_dp_rs2_regnm;
+    wire [`NameBus] ind_dp_rd_regnm;
+    wire [`OpBus] ind_dp_op;
+    wire [`AddrBus] ind_dp_pc;
+    wire [`ImmBus] ind_dp_imm;
+    wire ind_dp_pd;
+
+    wire dp_rob_nick_en;
+    wire rob_dp_nick_en;
+    wire [`NickBus] rob_dp_nick;
+
+    wire dp_rf_en;
+    wire [`NameBus] dp_rf_rs1_regnm;
+    wire [`NameBus] dp_rf_rs2_regnm;
+    wire [`NickBus] rf_dp_rs1_nick;
+    wire [`NickBus] rf_dp_rs2_nick;
+    wire [`DataBus] rf_dp_rs1_dt;
+    wire [`DataBus] rf_dp_rs2_dt;
+
+    wire dp_en;
+    wire [`OpBus] dp_op;
+    wire [`AddrBus] dp_pc;
+    wire [`ImmBus] dp_imm;
+    wire [`NickBus] dp_rd_nick;
+    wire [`NickBus] dp_rs1_nick;
+    wire [`NickBus] dp_rs2_nick;
+    wire [`DataBus] dp_rs1_dt;
+    wire [`DataBus] dp_rs2_dt;
+    wire dp_pd;
+
     wire rob_rf_en;
     wire [`NameBus] rob_rf_rd_regnm;
     wire [`DataBus] rob_rf_rd_dt;
     wire [`NickBus] rob_rf_rd_nick;
-    wire rob_rf_wrong;
-    wire rf_rob_en;
-    wire [`OpBus] rf_rob_op;
-    wire [`AddrBus] rf_rob_pc;
-    wire [`ImmBus] rf_rob_imm;
-    wire [`NickBus] rf_rob_rd_nick;
-    wire [`NickBus] rf_rob_rs1_nick;
-    wire [`DataBus] rf_rob_rs1_dt;
-    wire [`NickBus] rf_rob_rs2_nick;
-    wire [`DataBus] rf_rob_rs2_dt;
-    
-    wire rob_rs_en;
-    wire [`OpBus] rob_rs_op;
-    wire [`AddrBus] rob_rs_pc;
-    wire [`ImmBus] rob_rs_imm;
-    wire [`NickBus] rob_rs_rd_nick;
-    wire [`NickBus] rob_rs_rs1_nick;
-    wire [`DataBus] rob_rs_rs1_dt;
-    wire [`NickBus] rob_rs_rs2_nick;
-    wire [`DataBus] rob_rs_rs2_dt;
-    
-    wire rob_slb_en;
-    wire [`OpBus] rob_slb_op;
-    wire [`AddrBus] rob_slb_pc;
-    wire [`ImmBus] rob_slb_imm;
-    wire [`NickBus] rob_slb_rd_nick;
-    wire [`NickBus] rob_slb_rs1_nick;
-    wire [`DataBus] rob_slb_rs1_dt;
-    wire [`NickBus] rob_slb_rs2_nick;
-    wire [`DataBus] rob_slb_rs2_dt;
     
     wire slb_rob_en;
     wire [`NickBus] slb_rob_nick;
@@ -181,21 +164,22 @@ module cpu(
     .rst(rst_in),
     .rdy(rdy_in),
     
-    .iIC_en(ic_bp_en),
-    .iIC_inst(ic_bp_inst),
+    .iMC_en(mc_bp_en),
+    .iMC_inst(mc_bp_inst),
     
-    .iINF_en(inf_bp_en),
-    .iINF_pc(inf_bp_pc),
-    .oINF_en(bp_inf_en),
-    .oINF_ppc(bp_inf_ppc));
+    .oINF_pd(bp_inf_pd)
+    );
     //dcache
     dcache dcache(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .iMC_wait(mc_dc_wait),
     
-    .iMC_en(mc_dc_en),
+    .iMC_done(mc_dc_done),
     .iMC_dt(mc_dc_dt),
+
     .oMC_en(dc_mc_en),
     .oMC_ls(dc_mc_ls),
     .oMC_pc(dc_mc_pc),
@@ -214,7 +198,7 @@ module cpu(
     );
     
     //ex
-    ex ex(
+    execute execute(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
@@ -236,109 +220,144 @@ module cpu(
     .oROB_en(ex_rob_en),
     .oROB_nick(ex_rob_nick),
     .oROB_dt(ex_rob_dt),
-    .oROB_isBJ(ex_rob_isBJ),
+    .oROB_ac(ex_rob_ac),
     .oROB_j_pc(ex_rob_j_pc)
     );
     //icache
-    icache icache(
-    .clk(clk_in),
-    .rst(rst_in),
-    .rdy(rdy_in),
+    // icache icache(
+    // .clk(clk_in),
+    // .rst(rst_in),
+    // .rdy(rdy_in),
     
-    .iMC_en(mc_ic_en),
-    .iMC_inst(mc_ic_inst),
-    .oMC_en(ic_mc_en),
-    .oMC_pc(ic_mc_pc),
+    // .iMC_en(mc_ic_en),
+    // .iMC_inst(mc_ic_inst),
+    // .oMC_en(ic_mc_en),
+    // .oMC_pc(ic_mc_pc),
     
-    .iINF_en(inf_ic_en),
-    .iINF_pc(inf_ic_pc),
-    .oINF_en(ic_inf_en),
-    .oINF_inst(ic_inf_inst)
-    );
+    // .iINF_en(inf_ic_en),
+    // .iINF_pc(inf_ic_pc),
+    // .oINF_en(ic_inf_en),
+    // .oINF_inst(ic_inf_inst)
+    // );
     //inf
-    inf inf(
+    fetcher fetcher(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .clr(clr),
+    .iROB_j_pc(rob_inf_j_pc),
+
+    .iMC_wait(mc_inf_wait),
     
-    .oIC_en(inf_ic_en),
-    .oIC_pc(inf_ic_pc),
+    .oIC_en(inf_mc_en),
+    .oIC_pc(inf_mc_pc),
     
-    .iIC_en(ic_inf_en),
-    .iIC_inst(ic_inf_inst),
-    .oIS_en(inf_is_en),
-    .oIS_pc(inf_is_pc),
-    .oIS_inst(inf_is_inst),
+    .iIC_done(mc_inf_done),
+    .iIC_inst(mc_inf_inst),
     
     .iROB_full(rob_inf_full),
-    
-    .oBP_en(inf_bp_en),
-    .oBP_pc(inf_bp_pc),
-    .iBP_en(bp_inf_en),
-    .iBP_nxpc(bp_inf_ppc)
+    .iSLB_full(slb_inf_full),
+    .iRS_full(rs_inf_full),
+
+    .iBP_pd(bp_inf_pd),
+
+    .oIND_en(inf_ind_en),
+    .oIND_inst(inf_ind_inst),
+    .oIND_pc(inf_ind_pc),
+    .oIND_pd(inf_ind_pd)
     );
     
     //is
-    is is(
+    decoder decoder(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
     
-    .iINF_en(inf_is_en),
-    .iINF_inst(inf_is_inst),
-    .iINF_pc(inf_is_pc),
+    .iINF_en(inf_ind_en),
+    .iINF_inst(inf_ind_inst),
+    .iINF_pc(inf_ind_pc),
+    .iINF_pd(inf_ind_pd),
     
-    .oREG_en(is_reg_en),
-    .oREG_rs1_regnm(is_reg_rs1_regnm),
-    .oREG_rs2_regnm(is_reg_rs2_regnm),
-    .oREG_rd_regnm(is_reg_rd_regnm),
-    .oREG_op(is_reg_op),
-    .oREG_pc(is_reg_pc),
-    .oREG_imm(is_reg_imm),
-    
-    .oRS_en(is_rs_en),
-    .oRS_op(is_rs_op),
-    .oRS_pc(is_rs_pc),
-    .oRS_imm(is_rs_imm),
-    
-    .oROB_en(is_rob_en),
-    .oROB_rd_regnm(is_rob_rd_regnm),
-    .oROB_pc(is_rob_pc)
+    .oDP_en(ind_dp_en),
+    .oDP_rs1_regnm(ind_dp_rs1_regnm),
+    .oDP_rs2_regnm(ind_dp_rs2_regnm),
+    .oDP_rd_regnm(ind_dp_rd_regnm),
+    .oDP_op(ind_dp_op),
+    .oDP_pc(ind_dp_pc),
+    .oDP_imm(ind_dp_imm),
+    .oDP_pd(ind_dp_pd)
     );
     //mc
-    mc mc(
+    memctrl memctrl(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .iIO_buffer_full(io_buffer_full),
     
-    .iRAM_dt(ram_mc_dt),
-    .oRAM_en(mc_ram_en),
-    .oRAM_rw(mc_ram_rw),
-    .oRAM_addr(mc_ram_addr),
-    .oRAM_dt(mc_ram_dt),
+    .iMEM_dt(mem_din),
+    .oMEM_rw(mem_wr),
+    .oMEM_addr(mem_a),
+    .oMEM_dt(mem_dout),
     
-    .iIC_en(ic_mc_en),
-    .iIC_pc(ic_mc_pc),
-    .oIC_en(mc_ic_en),
-    .oIC_inst(mc_ic_inst),
+    .oINF_wait(mc_inf_wait),
+    .oDC_wait(mc_dc_wait),
+
+    .iINF_en(inf_mc_en),
+    .iINF_addr(inf_mc_pc),
+    .oINF_done(mc_inf_done),
+    .oINF_inst(mc_inf_inst),
+    
+    .oBP_en(mc_bp_en),
+    .oBP_inst(mc_bp_inst),
     
     .iDC_en(dc_mc_en),
     .iDC_ls(dc_mc_ls),
     .iDC_len(dc_mc_len),
     .iDC_addr(dc_mc_pc),
     .iDC_dt(dc_mc_dt),
-    .oDC_en(mc_dc_en),
+
+    .oDC_done(mc_dc_done),
     .oDC_dt(mc_dc_dt)
     );
-    
-    //ram
-    ram ram(
-    .clk_in(clk_in),
-    .en_in(mc_ram_en),
-    .r_nw_in(mc_ram_rw),
-    .a_in(mc_ram_addr),
-    .d_in(mc_ram_dt),
-    .d_out(ram_mc_dt)
+
+    dispatch dispatch(
+      .clk(clk_in),
+      .rst(rst_in),
+      .rdy(rdy_in),
+
+      .iIND_en(ind_dp_en),
+      .iIND_rs1_regnm(ind_dp_rs1_regnm),
+      .iIND_rs2_regnm(ind_dp_rs2_regnm),
+      .iIND_rd_regnm(ind_dp_rd_regnm),
+      .iIND_op(ind_dp_op),
+      .iIND_pc(ind_dp_pc),
+      .iIND_imm(ind_dp_imm),
+      .iIND_pd(ind_dp_pd),
+
+      .oROB_nick_en(dp_rob_nick_en),
+      .iROB_nick_en(rob_dp_nick_en),
+      .iROB_nick(rob_dp_nick),
+
+      .oRF_en(dp_rf_en),
+      .oRF_rs1_regnm(dp_rf_rs1_regnm),
+      .oRF_rs2_regnm(dp_rf_rs2_regnm),
+      .iRF_rs1_nick(rf_dp_rs1_nick),
+      .iRF_rs2_nick(rf_dp_rs2_nick),
+      .iRF_rs1_dt(rf_dp_rs1_dt),
+      .iRF_rs2_dt(rf_dp_rs2_dt),
+
+      .oDP_en(dp_en),
+      .oDP_op(dp_op),
+      .oDP_pc(dp_pc),
+      .oDP_imm(dp_imm),
+      .oDP_rd_nick(dp_rd_nick),
+      .oDP_rs1_nick(dp_rs1_nick),
+      .oDP_rs2_nick(dp_rs2_nick),
+      .oDP_rs1_dt(dp_rs1_dt),
+      .oDP_rs2_dt(dp_rs2_dt),
+      .oDP_pd(dp_pd)
     );
     
     //regfile
@@ -346,76 +365,46 @@ module cpu(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .clr(clr),
     
-    .iIS_en(is_reg_en),
-    .iIS_rs1_regnm(is_reg_rs1_regnm),
-    .iIS_rs2_regnm(is_reg_rs2_regnm),
-    .iIS_rd_regnm(is_reg_rd_regnm),
-    .iIS_op(is_reg_op),
-    .iIS_pc(is_reg_pc),
-    .iIS_imm(is_reg_imm),
-    
-    .iROB_nick_en(rob_rf_nick_en),
-    .iROB_nick_latest(rob_rf_nick_l),
+    .iDP_en(dp_rf_en),
+    .iDP_rs1_regnm(dp_rf_rs1_regnm),
+    .iDP_rs2_regnm(dp_rf_rs2_regnm),
+    .oDP_rs1_nick(rf_dp_rs1_nick),
+    .oDP_rs1_dt(rf_dp_rs1_dt),
+    .oDP_rs2_nick(rf_dp_rs2_nick),
+    .oDP_rs2_dt(rf_dp_rs2_dt),
+
     .iROB_en(rob_rf_en),
     .iROB_rd_regnm(rob_rf_rd_regnm),
     .iROB_rd_dt(rob_rf_rd_dt),
-    .iROB_rd_nick(rob_rf_rd_nick),
-    
-    .iROB_wrong(rob_rf_wrong),
-    
-    .oROB_en(rf_rob_en),
-    .oROB_op(rf_rob_op),
-    .oROB_pc(rf_rob_pc),
-    .oROB_imm(rf_rob_imm),
-    .oROB_rd_nick(rf_rob_rd_nick),
-    .oROB_rs1_nick(rf_rob_rs1_nick),
-    .oROB_rs1_dt(rf_rob_rs1_dt),
-    .oROB_rs2_nick(rf_rob_rs2_nick),
-    .oROB_rs2_dt(rf_rob_rs2_dt)
+    .iROB_rd_nick(rob_rf_rd_nick)
     );
     //rob
     rob rob(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
-    
-    .oRF_nick_en(rob_rf_nick_en),
-    .oRF_nick_latest(rob_rf_nick_l),
-    .iRF_en(rf_rob_en),
-    .iRF_op(rf_rob_op),
-    .iRF_pc(rf_rob_pc),
-    .iRF_imm(rf_rob_imm),
-    .iRF_rd_nick(rf_rob_rd_nick),
-    .iRF_rs1_nick(rf_rob_rs1_nick),
-    .iRF_rs1_dt(rf_rob_rs1_dt),
-    .iRF_rs2_nick(rf_rob_rs2_nick),
-    .iRF_rs2_dt(rf_rob_rs2_dt),
-    
-    .oRS_en(rob_rs_en),
-    .oRS_op(rob_rs_op),
-    .oRS_pc(rob_rs_pc),
-    .oRS_imm(rob_rs_imm),
-    .oRS_rd_nick(rob_rs_rd_nick),
-    .oRS_rs1_nick(rob_rs_rs1_nick),
-    .oRS_rs1_dt(rob_rs_rs1_dt),
-    .oRS_rs2_nick(rob_rs_rs2_nick),
-    .oRS_rs2_dt(rob_rs_rs2_dt),
-    
-    .oSLB_en(rob_slb_en),
-    .oSLB_op(rob_slb_op),
-    .oSLB_pc(rob_slb_pc),
-    .oSLB_imm(rob_slb_imm),
-    .oSLB_rd_nick(rob_slb_rd_nick),
-    .oSLB_rs1_nick(rob_slb_rs1_nick),
-    .oSLB_rs1_dt(rob_slb_rs1_dt),
-    .oSLB_rs2_nick(rob_slb_rs2_nick),
-    .oSLB_rs2_dt(rob_slb_rs2_dt),
+
+    .clr(clr),
+    .oINF_j_pc(rob_inf_j_pc),
+
+    .oINF_full(rob_inf_full),
+
+    .iDP_nick_en(dp_rob_nick_en),
+    .oDP_nick_en(rob_dp_nick_en),
+    .oDP_nick(rob_dp_nick),
+
+    .iDP_en(dp_en),
+    .iDP_op(dp_op),
+    .iDP_rd_nick(dp_rd_nick),
+    .iDP_pd(dp_pd),
     
     .iEX_en(ex_rob_en),
     .iEX_nick(ex_rob_nick),
     .iEX_dt(ex_rob_dt),
-    .iEX_isBJ(ex_rob_isBJ),
+    .iEX_ac(ex_rob_ac),
     .iEX_j_pc(ex_rob_j_pc),
     
     .iSLB_en(slb_rob_en),
@@ -428,27 +417,25 @@ module cpu(
     .oRF_en(rob_rf_en),
     .oRF_rd_regnm(rob_rf_rd_regnm),
     .oRF_rd_dt(rob_rf_rd_dt),
-    .oRF_rd_nick(rob_rf_rd_nick),
-    
-    .oINF_full(rob_inf_full),
-    .oSLB_wrong(rob_slb_wrong),
-    .oRF_wrong(rob_rf_wrong)
+    .oRF_rd_nick(rob_rf_rd_nick)
     );
     //rs
     rs rs(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .clr(clr),
     
-    .iROB_en(rob_rs_en),
-    .iROB_op(rob_rs_op),
-    .iROB_pc(rob_rs_pc),
-    .iROB_imm(rob_rs_pc),
-    .iROB_rd_nick(rob_rs_rd_nick),
-    .iROB_rs1_nick(rob_rs_rs1_nick),
-    .iROB_rs1_dt(rob_rs_rs1_dt),
-    .iROB_rs2_nick(rob_rs_rs2_nick),
-    .iROB_rs2_dt(rob_rs_rs2_dt),
+    .iDP_en(dp_en),
+    .iDP_op(dp_op),
+    .iDP_pc(dp_pc),
+    .iDP_imm(dp_pc),
+    .iDP_rd_nick(dp_rd_nick),
+    .iDP_rs1_nick(dp_rs1_nick),
+    .iDP_rs1_dt(dp_rs1_dt),
+    .iDP_rs2_nick(dp_rs2_nick),
+    .iDP_rs2_dt(dp_rs2_dt),
     
     .iEX_en(ex_rs_en),
     .iEX_nick(ex_rs_nick),
@@ -463,23 +450,27 @@ module cpu(
     .oEX_imm(rs_ex_imm),
     .oEX_rd_nick(rs_ex_rd_nick),
     .oEX_rs1_dt(rs_ex_rs1_dt),
-    .oEX_rs2_dt(rs_ex_rs2_dt)
+    .oEX_rs2_dt(rs_ex_rs2_dt),
+
+    .oINF_full(rs_inf_full)
     );
     //slb
     slb slb(
     .clk(clk_in),
     .rst(rst_in),
     .rdy(rdy_in),
+
+    .clr(clr),
     
-    .iROB_en(rob_slb_en),
-    .iROB_op(rob_slb_op),
-    .iROB_pc(rob_slb_pc),
-    .iROB_imm(rob_slb_imm),
-    .iROB_rd_nick(rob_slb_rd_nick),
-    .iROB_rs1_nick(rob_slb_rs1_nick),
-    .iROB_rs1_dt(rob_slb_rs1_dt),
-    .iROB_rs2_nick(rob_slb_rs2_nick),
-    .iROB_rs2_dt(rob_slb_rs2_dt),
+    .iDP_en(dp_en),
+    .iDP_op(dp_op),
+    .iDP_pc(dp_pc),
+    .iDP_imm(dp_imm),
+    .iDP_rd_nick(dp_rd_nick),
+    .iDP_rs1_nick(dp_rs1_nick),
+    .iDP_rs1_dt(dp_rs1_dt),
+    .iDP_rs2_nick(dp_rs2_nick),
+    .iDP_rs2_dt(dp_rs2_dt),
     
     .iEX_en(ex_slb_en),
     .iEX_nick(ex_slb_nick),
@@ -497,8 +488,6 @@ module cpu(
     .oROB_nick(slb_rob_nick),
     .oROB_dt(slb_rob_dt),
     
-    .iROB_wrong(rob_slb_wrong),
-    
     .iROB_commit_en(rob_slb_commit_en),
     .iROB_commit_nick(rob_slb_commit_nick),
     .oDC_en(slb_dc_en),
@@ -510,7 +499,9 @@ module cpu(
     
     .iDC_en(dc_slb_en),
     .iDC_nick(dc_slb_nick),
-    .iDC_dt(dc_slb_dt)
+    .iDC_dt(dc_slb_dt),
+
+    .oINF_full(slb_inf_full)
     );
     
 endmodule
