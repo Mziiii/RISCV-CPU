@@ -153,28 +153,20 @@ module decoder (//ind
                         4'b1000:begin
                             oRF_op = `ADDI;
                         end
-                        4'b0010,
-                        4'b1010:begin
+                        4'b0010:begin
                             oRF_op = `SLTI;
                         end
-                        4'b0011,
-                        4'b1011:begin
+                        4'b0011:begin
                             oRF_op = `SLTIU;
                         end
-                        4'b0100,
-                        4'b1100:begin
+                        4'b0100:begin
                             oRF_op = `XORI;
                         end
-                        4'b0110,
-                        4'b1110:begin
+                        4'b0110:begin
                             oRF_op = `ORI;
                         end
-                        4'b0111,
-                        4'b1111:begin
+                        4'b0111:begin
                             oRF_op = `ANDI;
-                        end
-                        4'b0001:begin
-                            oRF_op = `SLLI;
                         end
                         4'b0101:begin
                             oRF_op = `SRLI;
@@ -182,7 +174,7 @@ module decoder (//ind
                         4'b1101:begin
                             oRF_op = `SRAI;
                         end
-                        default:begin//4'1001
+                        default:begin
                             oRF_op = `NOP;
                         end
                     endcase
