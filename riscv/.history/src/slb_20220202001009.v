@@ -184,13 +184,13 @@
                     end
                 end
                 else begin
-                    for (i = `RSNum - 1; i >= 0; i = i - 1 ) begin
+                    for (i = `RSNum-1; i>=0; i = i-1 ) begin
                         if(occupied[i]&&rs1_valid[i]&&ls[i]==`Load) begin
-                            oDC_en   <= 1'b1;
-                            oDC_ls   <= `Load;
-                            oDC_nick <= i[`NickBus];
-                            oDC_dt   <= 0;
-                            oDC_addr <= rs1_dt[i] + imm[i];
+                            oDC_en<=1'b1;
+                            oDC_ls<=`Load;
+                            oDC_nick<=i[`NickBus];
+                            oDC_dt<=0;
+                            oDC_addr<=rs1_dt[i]+imm[i];
                             case (op[i])
                                 `LB,
                                 `LBU:oDC_len <= `One;
@@ -231,8 +231,7 @@
                     default: ls[idx] <= `Load;
                     endcase
                 end
-                default;
-                endcase
+                default
             end
         end
     end

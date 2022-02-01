@@ -184,13 +184,13 @@
                     end
                 end
                 else begin
-                    for (i = `RSNum - 1; i >= 0; i = i - 1 ) begin
+                    for (i = `RSNum-1; i>=0; i = i-1 ) begin
                         if(occupied[i]&&rs1_valid[i]&&ls[i]==`Load) begin
-                            oDC_en   <= 1'b1;
-                            oDC_ls   <= `Load;
-                            oDC_nick <= i[`NickBus];
-                            oDC_dt   <= 0;
-                            oDC_addr <= rs1_dt[i] + imm[i];
+                            oDC_en<=1'b1;
+                            oDC_ls<=`Load;
+                            oDC_nick<=i[`NickBus];
+                            oDC_dt<=0;
+                            oDC_addr<=rs1_dt[i]+imm[i];
                             case (op[i])
                                 `LB,
                                 `LBU:oDC_len <= `One;
@@ -214,25 +214,8 @@
                 `LH,
                 `LHU,
                 `LW:begin
-                    occupied[idx]  <= 1'b1;
-                    op[idx]        <= iDP_op;
-                    pc[idx]        <= iDP_pc;
-                    imm[idx]       <= iDP_imm;
-                    rs1_nick[idx]  <= iDP_rs1_nick;
-                    rs2_nick[idx]  <= iDP_rs2_nick;
-                    rs1_dt[idx]    <= iDP_rs1_dt;
-                    rs2_dt[idx]    <= iDP_rs2_dt;
-                    rs1_valid[idx] <= iDP_rs1_nick == 0?1'b1:1'b0;
-                    rs2_valid[idx] <= iDP_rs2_nick == 0?1'b1:1'b0;
-                    case (iDP_op)
-                    `SB,
-                    `SH,
-                    `SW:ls[idx]      <= `Store;
-                    default: ls[idx] <= `Load;
-                    endcase
+                    
                 end
-                default;
-                endcase
             end
         end
     end

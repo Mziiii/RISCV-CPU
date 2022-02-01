@@ -184,7 +184,7 @@
                     end
                 end
                 else begin
-                    for (i = `RSNum - 1; i >= 0; i = i - 1 ) begin
+                    for (i = `RSNum-1; i>=0; i = i-1 ) begin
                         if(occupied[i]&&rs1_valid[i]&&ls[i]==`Load) begin
                             oDC_en   <= 1'b1;
                             oDC_ls   <= `Load;
