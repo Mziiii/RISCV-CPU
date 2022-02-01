@@ -92,7 +92,7 @@ module rob (
                 oROB_nick_regnm = 0;
             end
         end else begin
-            oINF_full       = 0;
+            oINF_full      = 0;
             oROB_nick_en    = 1'b0;
             oROB_nick       = 0;
             oROB_nick_regnm = 0;

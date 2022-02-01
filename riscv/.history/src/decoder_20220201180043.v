@@ -42,13 +42,12 @@ module decoder (//ind
             oRF_pd        = `NotJump;
         end
         else if(rdy && iINF_en) begin
-            oROB_en       = 1'b1;
+            oROB
             oRF_pc        = iINF_pc;
             oRF_en        = 1'b1;
             oRF_rs1_regnm = iINF_inst[19:15];
             oRF_rs2_regnm = iINF_inst[24:20];
             oRF_rd_regnm  = iINF_inst[11:7];
-            oROB_rd_regnm = iINF_inst[11:7];
             oRF_pd        = iINF_pd;
             case (opcode)
                 7'b0110111,

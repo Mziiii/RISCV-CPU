@@ -164,6 +164,8 @@ module cpu(
     wire [`NickBus] slb_slb_nick;
     wire [`DataBus] slb_slb_dt;
     
+    wire rob_slb_wrong;
+
     //bp
     bp bp(
     .clk(clk_in),

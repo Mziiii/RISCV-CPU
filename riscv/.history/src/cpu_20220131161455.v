@@ -104,33 +104,27 @@ module cpu(
     wire [`InstBus] inf_ind_inst;
     wire [`AddrBus] inf_ind_pc;
     wire inf_ind_pd;
-
-    wire ind_rob_en;
-    wire [`NameBus] ind_rob_rd_regnm;
-
-    wire rob_nick_en;
-    wire [`NickBus] rob_nick;
-    wire [`NameBus] rob_nick_regnm;
        
-    wire ind_rf_en;
-    wire [`NameBus] ind_rf_rs1_regnm;
-    wire [`NameBus] ind_rf_rs2_regnm;
-    wire [`NameBus] ind_rf_rd_regnm;
-    wire [`OpBus] ind_rf_op;
-    wire [`AddrBus] ind_rf_pc;
-    wire [`ImmBus] ind_rf_imm;
-    wire ind_rf_pd;
+    wire ind_dp_en;
+    wire [`NameBus] ind_dp_rs1_regnm;
+    wire [`NameBus] ind_dp_rs2_regnm;
+    wire [`NameBus] ind_dp_rd_regnm;
+    wire [`OpBus] ind_dp_op;
+    wire [`AddrBus] ind_dp_pc;
+    wire [`ImmBus] ind_dp_imm;
+    wire ind_dp_pd;
 
+    wire dp_rob_nick_en;
+    wire rob_dp_nick_en;
+    wire [`NickBus] rob_dp_nick;
+
+    wire dp_rf_en;
+    wire [`NameBus] dp_rf_rs1_regnm;
+    wire [`NameBus] dp_rf_rs2_regnm;
     wire [`NickBus] rf_dp_rs1_nick;
     wire [`NickBus] rf_dp_rs2_nick;
     wire [`DataBus] rf_dp_rs1_dt;
     wire [`DataBus] rf_dp_rs2_dt;
-    wire rf_dp_en;
-    wire [`NameBus] rf_dp_rd_regnm;
-    wire [`OpBus] rf_dp_op;
-    wire [`AddrBus] rf_dp_pc;
-    wire [`ImmBus] rf_dp_imm;
-    wire rf_dp_pd;
 
     wire dp_en;
     wire [`OpBus] dp_op;
@@ -142,7 +136,6 @@ module cpu(
     wire [`DataBus] dp_rs1_dt;
     wire [`DataBus] dp_rs2_dt;
     wire dp_pd;
-    wire [`NameBus] dp_rd_regnm;
 
     wire rob_rf_en;
     wire [`NameBus] rob_rf_rd_regnm;
@@ -175,8 +168,7 @@ module cpu(
     
     .oINF_pd(bp_inf_pd)
     );
-
-    //dc
+    //dcache
     dcache dcache(
     .clk(clk_in),
     .rst(rst_in),
@@ -230,8 +222,7 @@ module cpu(
     .oROB_ac(ex_rob_ac),
     .oROB_j_pc(ex_rob_j_pc)
     );
-
-    //ic
+    //icache
     // icache icache(
     // .clk(clk_in),
     // .rst(rst_in),
@@ -247,7 +238,6 @@ module cpu(
     // .oINF_en(ic_inf_en),
     // .oINF_inst(ic_inf_inst)
     // );
-
     //inf
     fetcher fetcher(
     .clk(clk_in),
@@ -277,7 +267,7 @@ module cpu(
     .oIND_pd(inf_ind_pd)
     );
     
-    //ind
+    //is
     decoder decoder(
     .clk(clk_in),
     .rst(rst_in),
@@ -287,20 +277,16 @@ module cpu(
     .iINF_inst(inf_ind_inst),
     .iINF_pc(inf_ind_pc),
     .iINF_pd(inf_ind_pd),
-
-    .oROB_en(ind_rob_en),
-    .oROB_rd_regnm(ind_rob_rd_regnm),
     
-    .oRF_en(ind_rf_en),
-    .oRF_rs1_regnm(ind_rf_rs1_regnm),
-    .oRF_rs2_regnm(ind_rf_rs2_regnm),
-    .oRF_rd_regnm(ind_rf_rd_regnm),
-    .oRF_op(ind_rf_op),
-    .oRF_pc(ind_rf_pc),
-    .oRF_imm(ind_rf_imm),
-    .oRF_pd(ind_rf_pd)
+    .oDP_en(ind_dp_en),
+    .oDP_rs1_regnm(ind_dp_rs1_regnm),
+    .oDP_rs2_regnm(ind_dp_rs2_regnm),
+    .oDP_rd_regnm(ind_dp_rd_regnm),
+    .oDP_op(ind_dp_op),
+    .oDP_pc(ind_dp_pc),
+    .oDP_imm(ind_dp_imm),
+    .oDP_pd(ind_dp_pd)
     );
-
     //mc
     memctrl memctrl(
     .clk(clk_in),
@@ -335,32 +321,37 @@ module cpu(
     .oDC_dt(mc_dc_dt)
     );
 
-    //dp
     dispatch dispatch(
       .clk(clk_in),
       .rst(rst_in),
       .rdy(rdy_in),
 
-      .iROB_nick_en(rob_nick_en),
-      .iROB_nick(rob_nick),
+      .iIND_en(ind_dp_en),
+      .iIND_rs1_regnm(ind_dp_rs1_regnm),
+      .iIND_rs2_regnm(ind_dp_rs2_regnm),
+      .iIND_rd_regnm(ind_dp_rd_regnm),
+      .iIND_op(ind_dp_op),
+      .iIND_pc(ind_dp_pc),
+      .iIND_imm(ind_dp_imm),
+      .iIND_pd(ind_dp_pd),
 
-      .iRF_en(rf_dp_en),
+      .oROB_nick_en(dp_rob_nick_en),
+      .iROB_nick_en(rob_dp_nick_en),
+      .iROB_nick(rob_dp_nick),
+
+      .oRF_en(dp_rf_en),
+      .oRF_rs1_regnm(dp_rf_rs1_regnm),
+      .oRF_rs2_regnm(dp_rf_rs2_regnm),
       .iRF_rs1_nick(rf_dp_rs1_nick),
       .iRF_rs2_nick(rf_dp_rs2_nick),
       .iRF_rs1_dt(rf_dp_rs1_dt),
       .iRF_rs2_dt(rf_dp_rs2_dt),
-      .iRF_op(rf_dp_op),
-      .iRF_pc(rf_dp_pc),
-      .iRF_imm(rf_dp_imm),
-      .iRF_pd(rf_dp_pd),
-      .iRF_rd_regnm(rf_dp_rd_regnm),
 
       .oDP_en(dp_en),
       .oDP_op(dp_op),
       .oDP_pc(dp_pc),
       .oDP_imm(dp_imm),
       .oDP_rd_nick(dp_rd_nick),
-      .oDP_rd_regnm(dp_rd_regnm),
       .oDP_rs1_nick(dp_rs1_nick),
       .oDP_rs2_nick(dp_rs2_nick),
       .oDP_rs1_dt(dp_rs1_dt),
@@ -368,7 +359,7 @@ module cpu(
       .oDP_pd(dp_pd)
     );
     
-    //rf
+    //regfile
     regfile regfile(
     .clk(clk_in),
     .rst(rst_in),
@@ -376,36 +367,19 @@ module cpu(
 
     .clr(clr),
     
-    .iIND_en(ind_rf_en),
-    .iIND_rs1_regnm(ind_rf_rs1_regnm),
-    .iIND_rs2_regnm(ind_rf_rs2_regnm),
+    .iDP_en(dp_rf_en),
+    .iDP_rs1_regnm(dp_rf_rs1_regnm),
+    .iDP_rs2_regnm(dp_rf_rs2_regnm),
     .oDP_rs1_nick(rf_dp_rs1_nick),
     .oDP_rs1_dt(rf_dp_rs1_dt),
     .oDP_rs2_nick(rf_dp_rs2_nick),
     .oDP_rs2_dt(rf_dp_rs2_dt),
-
-    .iIND_rd_regnm(ind_rf_rd_regnm),
-    .iIND_op(ind_rf_op),
-    .iIND_pc(ind_rf_pc),
-    .iIND_imm(ind_rf_imm),
-    .iIND_pd(ind_rf_pd),
-    .oDP_en(rf_dp_en),
-    .oDP_rd_regnm(rf_dp_rd_regnm),
-    .oDP_op(rf_dp_op),
-    .oDP_pc(rf_dp_pc),
-    .oDP_imm(rf_dp_imm),
-    .oDP_pd(rf_dp_pd),
-
-    .iROB_nick_en(rob_nick_en),
-    .iROB_nick_regnm(rob_nick_regnm),
-    .iROB_nick(rob_nick),
 
     .iROB_en(rob_rf_en),
     .iROB_rd_regnm(rob_rf_rd_regnm),
     .iROB_rd_dt(rob_rf_rd_dt),
     .iROB_rd_nick(rob_rf_rd_nick)
     );
-
     //rob
     rob rob(
     .clk(clk_in),
@@ -417,17 +391,14 @@ module cpu(
 
     .oINF_full(rob_inf_full),
 
-    .iIND_en(ind_rob_en),
-    .iIND_rd_regnm(ind_rob_rd_regnm),
-    .oROB_nick_en(rob_nick_en),
-    .oROB_nick(rob_nick),
-    .oROB_nick_regnm(rob_nick_regnm),
+    .iDP_nick_en(dp_rob_nick_en),
+    .oDP_nick_en(rob_dp_nick_en),
+    .oDP_nick(rob_dp_nick),
 
     .iDP_en(dp_en),
     .iDP_op(dp_op),
-    .iDP_pd(dp_pd),
     .iDP_rd_nick(dp_rd_nick),
-    .iDP_rd_regnm(dp_rd_regnm),
+    .iDP_pd(dp_pd),
     
     .iEX_en(ex_rob_en),
     .iEX_nick(ex_rob_nick),
@@ -482,7 +453,6 @@ module cpu(
 
     .oINF_full(rs_inf_full)
     );
-    
     //slb
     slb slb(
     .clk(clk_in),

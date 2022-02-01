@@ -82,7 +82,7 @@
     
     integer i;
     always @(posedge clk) begin
-        if (rst||clr) begin
+        if (rst) begin
             for (i = 0; i< `SLBNum; i = i+1) begin
                 ls[i]       <= 1'b0;
                 rs1_dt[i]   <= 0;

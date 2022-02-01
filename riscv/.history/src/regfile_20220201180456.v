@@ -91,7 +91,7 @@ module regfile(
                 oDP_rd_regnm = 0;
             end
         end else begin
-            oDP_en       = 1'b0;
+            oDP_en       = 0;
             oDP_rs1_dt   = 0;
             oDP_rs2_dt   = 0;
             oDP_rs1_nick = 0;
