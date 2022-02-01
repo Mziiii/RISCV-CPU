@@ -125,11 +125,11 @@ module rs (
                         pc[idx]       <= iDP_pc;
                         imm[idx]      <= iDP_imm;
                         rs1_nick[idx] <= iDP_rs1_nick;
-                        rs2_nick[idx] <= iDP_rs2_nick;
-                        rs1_dt[idx]   <= iDP_rs1_dt;
-                        rs2_dt[idx]   <= iDP_rs2_dt;
-                        rs1_valid[idx]<= iDP_rs1_nick == 0?1'b1:1'b0;
-                        rs2_valid[idx]<= iDP_rs2_nick == 0?1'b1:1'b0;
+                    rs2_nick[idx] <= iDP_rs2_nick;
+                    rs1_dt[idx]   <= iDP_rs1_dt;
+                    rs2_dt[idx]   <= iDP_rs2_dt;
+                    rs1_valid[idx]<= iDP_rs1_nick == 0?1'b1:1'b0;
+                    rs2_valid[idx]<= iDP_rs2_nick == 0?1'b1:1'b0;
                     end
                     endcase
                 end

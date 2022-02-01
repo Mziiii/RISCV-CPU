@@ -182,7 +182,7 @@ module decoder (//ind
                         4'b1101:begin
                             oRF_op = `SRAI;
                         end
-                        default:begin//4'1001
+                        default:begin//
                             oRF_op = `NOP;
                         end
                     endcase

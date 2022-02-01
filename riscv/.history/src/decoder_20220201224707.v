@@ -173,17 +173,12 @@ module decoder (//ind
                         4'b1111:begin
                             oRF_op = `ANDI;
                         end
-                        4'b0001:begin
-                            oRF_op = `SLLI;
-                        end
+                        4'b
                         4'b0101:begin
                             oRF_op = `SRLI;
                         end
                         4'b1101:begin
                             oRF_op = `SRAI;
-                        end
-                        default:begin//4'1001
-                            oRF_op = `NOP;
                         end
                     endcase
                 end

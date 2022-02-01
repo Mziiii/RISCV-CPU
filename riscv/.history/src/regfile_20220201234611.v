@@ -88,7 +88,7 @@ module regfile(
             oDP_rd_regnm = 0;
         end
         else if (rdy) begin
-            if (iROB_en) begin
+                        if (iROB_en) begin
                 if (reg_nick[iROB_rd_regnm] == iROB_rd_nick) begin
                     reg_nick[iROB_rd_regnm] = 0;
                     reg_dt[iROB_rd_regnm]   = iROB_rd_dt;

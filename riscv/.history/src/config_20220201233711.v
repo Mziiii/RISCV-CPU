@@ -125,8 +125,8 @@
 `define BGE        6'b001000
 `define BLTU       6'b001001
 `define BGEU       6'b001010
-`define LH         6'b001011
-`define LW         6'b001100
+`define LH         6'b001100
+`define LW         6'b001010
 `define LB         6'b001101
 `define LBU        6'b001110
 `define LHU        6'b001111

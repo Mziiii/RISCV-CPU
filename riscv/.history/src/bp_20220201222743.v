@@ -19,27 +19,27 @@ module bp (
 );
     wire [6:0] opcode = iMC_inst[6:0];
     
-    always @(*) begin
+    always @(posedge clk) begin
         if (rst) begin
-            oINF_pd = `NotJump;
+            oINF_pd <= `NotJump;
         end
         else if (rdy) begin
             if (iMC_en) begin
                 case (opcode)
-                    7'b1101111: oINF_pd = `Jump;//JAL
-                    7'b1100111: oINF_pd = `NotJump;//JALR
+                    7'b1101111: oINF_pd <= `Jump;//JAL
+                    7'b1100111: oINF_pd <= `NotJump;//JALR
                     7'b1100011://Branch
                     begin
                         //if (iROB_commit_en_wrong) begin
                             //case ()
                             //endcase
                         // end
-                        oINF_pd = `NotJump;
+                        oINF_pd <= `NotJump;
                     end
-                    default: oINF_pd = `NotJump;
+                    default: oINF_pd <= `NotJump;
                 endcase
             end
-            else oINF_pd = `NotJump;
+            else oINF_pd <= `NotJump;
         end
     end
 endmodule

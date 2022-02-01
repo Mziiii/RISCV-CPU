@@ -55,6 +55,14 @@ module regfile(
     integer i;
 
     always @(*) begin
+        if(rst) begin
+
+        end else if(rdy) begin
+            
+        end 
+    end
+
+    always @(*) begin
         if (rst) begin
             for (i = 0 ;i<`RegNum ;i = i+1) begin
                 reg_dt[i]   = 0;
@@ -76,24 +84,8 @@ module regfile(
             for (i = 0 ;i<`RegNum ;i = i+1) begin
                 reg_nick[i] = 0;
             end
-            oDP_en       = 1'b0;
-            oDP_rs1_dt   = 0;
-            oDP_rs2_dt   = 0;
-            oDP_rs1_nick = 0;
-            oDP_rs2_nick = 0;
-            oDP_imm      = 0;
-            oDP_op       = 0;
-            oDP_pc       = 0;
-            oDP_pd       = 0;
-            oDP_rd_regnm = 0;
         end
         else if (rdy) begin
-            if (iROB_en) begin
-                if (reg_nick[iROB_rd_regnm] == iROB_rd_nick) begin
-                    reg_nick[iROB_rd_regnm] = 0;
-                    reg_dt[iROB_rd_regnm]   = iROB_rd_dt;
-                end
-            end
             if(iIND_en) begin
                 oDP_en       = 1'b1;
                 oDP_rs1_dt   = reg_dt[iIND_rs1_regnm];
@@ -118,6 +110,12 @@ module regfile(
                 oDP_pc       = 0;
                 oDP_pd       = 0;
                 oDP_rd_regnm = 0;
+            end
+            if (iROB_en) begin
+                if (reg_nick[iROB_rd_regnm] == iROB_rd_nick) begin
+                    reg_nick[iROB_rd_regnm] = 0;
+                    reg_dt[iROB_rd_regnm]   = iROB_rd_dt;
+                end
             end
             if (iROB_nick_en) begin
                 reg_nick[iROB_nick_regnm] = iROB_nick;
