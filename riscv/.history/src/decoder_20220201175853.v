@@ -11,10 +11,6 @@ module decoder (//ind
     input wire [`AddrBus] iINF_pc,
     input wire            iINF_pd,
 
-    //rob ->to send 
-    output reg            oROB_en,
-    output reg [`NameBus] oROB_rd_regnm,
-
     //regfile -> to send rs1_regnick & rs2_regnick
     output reg            oRF_en,
     output reg [`NameBus] oRF_rs1_regnm,
@@ -32,8 +28,6 @@ module decoder (//ind
     
     always @(*) begin
         if (rst) begin
-            oROB_en       = 1'b0;
-            oROB_rd_regnm = 0;
             oRF_en        = 1'b0;
             oRF_imm       = 0;
             oRF_rs1_regnm = 0;
@@ -42,15 +36,13 @@ module decoder (//ind
             oRF_pd        = `NotJump;
         end
         else if(rdy && iINF_en) begin
-            oROB_en       = 1'b1;
             oRF_pc        = iINF_pc;
             oRF_en        = 1'b1;
             oRF_rs1_regnm = iINF_inst[19:15];
             oRF_rs2_regnm = iINF_inst[24:20];
             oRF_rd_regnm  = iINF_inst[11:7];
-            oROB_rd_regnm = iINF_inst[11:7];
             oRF_pd        = iINF_pd;
-            case (opcode)
+            case (iINF_inst[6:0])
                 7'b0110111,
                 7'b0010111:begin
                     oRF_imm[31:12] = iINF_inst[31:12];

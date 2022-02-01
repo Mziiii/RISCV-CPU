@@ -5,7 +5,9 @@ module dispatch (
     input wire rst,
     input wire rdy,
 
-    //from ROB to get rd_nick
+    //from decoder
+
+    //from ROB  to get rd_nick
     input wire            iROB_nick_en,
     input wire [`NickBus] iROB_nick,
 
@@ -37,17 +39,17 @@ module dispatch (
     
     always @(*) begin
         if (rst) begin
-            oDP_en        = 1'b0;
-            oDP_op        = 0;
-            oDP_pc        = 0;
-            oDP_pd        = 1'b0;
-            oDP_imm       = 0;
-            oDP_rd_nick   = 0;
-            oDP_rd_regnm  = 0;
-            oDP_rs1_nick  = 0;
-            oDP_rs2_nick  = 0;
-            oDP_rs1_dt    = 0;
-            oDP_rs2_dt    = 0;
+            oDP_en         = 1'b0;
+            oDP_op         = 0;
+            oDP_pc         = 0;
+            oDP_pd         = 1'b0;
+            oDP_imm        = 0;
+            oDP_rd_nick    = 0;
+            oDP_rd_regnm   = 0;
+            oDP_rs1_nick   = 0;
+            oDP_rs2_nick   = 0;
+            oDP_rs1_dt     = 0;
+            oDP_rs2_dt     = 0;
         end 
         else if (rdy) 
         begin
@@ -98,28 +100,29 @@ module dispatch (
                         end
                     endcase
                 end
-            end else begin
-                oDP_en        = 1'b0;
-                oDP_op        = 0;
-                oDP_pc        = 0;
-                oDP_pd        = 1'b0;
-                oDP_imm       = 0;
-                oDP_rd_nick   = 0;
-                oDP_rd_regnm  = 0;
-                oDP_rs1_nick  = 0;
-                oDP_rs2_nick  = 0;
-                oDP_rs1_dt    = 0;
-                oDP_rs2_dt    = 0;
+            end 
+            else begin
+                oDP_en         = 1'b0;
+                oDP_op         = 0;
+                oDP_pc         = 0;
+                oDP_pd         = 1'b0;
+                oDP_imm        = 0;
+                oDP_rd_nick    = 0;
+                oDP_rd_regnm   = 0;
+                oDP_rs1_nick   = 0;
+                oDP_rs2_nick   = 0;
+                oDP_rs1_dt     = 0;
+                oDP_rs2_dt     = 0;
             end
         end else begin
-            oDP_en        = 1'b0;
-            oDP_op        = 0;
-            oDP_pc        = 0;
-            oDP_pd        = 1'b0;
-            oDP_imm       = 0;
-            oDP_rd_nick   = 0;
-            oDP_rd_regnm  = 0;
-            oDP_rs1_nick  = 0;
+            oDP_en         = 1'b0;
+            oDP_op         = 0;
+            oDP_pc         = 0;
+            oDP_pd         = 1'b0;
+            oDP_imm        = 0;
+            oDP_rd_nick    = 0;
+            oDP_rd_regnm   = 0;
+            oDP_rs1_nick   = 0;
             oDP_rs2_nick  = 0;
             oDP_rs1_dt    = 0;
             oDP_rs2_dt    = 0;

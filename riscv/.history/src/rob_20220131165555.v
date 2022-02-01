@@ -11,19 +11,17 @@ module rob (
     //inf 
     output reg            oINF_full,
 
-    input wire            iIND_en,
-    input wire [`NameBus] iIND_rd_regnm,
-    //send nick to dispatch(->rf/dispatch)
-    output reg            oROB_nick_en,
-    output reg [`NickBus] oROB_nick,
-    output reg [`NameBus] oROB_nick_regnm,
+    input wire            iDP_nick_en,
+    //send nick to dispatch
+    output reg            oDP_nick_en,
+    output reg [`NickBus] oDP_nick,
+
 
     //dispatch to rs/slb
     input wire            iDP_en,
     input wire [`OpBus]   iDP_op,
-    input wire            iDP_pd,
     input wire [`NickBus] iDP_rd_nick,
-    input wire [`NickBus] iDP_rd_regnm,
+    input wire            iDP_pd,
 
 
     //ex
@@ -71,31 +69,18 @@ module rob (
     //dispatch and commit
     always @(*) begin
         if(rst) begin
-            oINF_full       = 1'b0;
-            oROB_nick_en    = 1'b0;
-            oROB_nick       = 0;
-            oROB_nick_regnm = 0;
-            wt_ptr          = 1;
+            oINF_full = 1'b0;
+            oDP_nick_en    = 1'b0;
+            oDP_nick  = 0;
+            wt_ptr    = 1;
         end 
         else if(rdy) begin
             oINF_full = full;
-            if(iIND_en&&!full) begin
-                oROB_nick_en    = 1'b1;
-                oROB_nick       = wt_ptr;
-                oROB_nick_regnm = iIND_rd_regnm;
-                if(wt_ptr!=5'b11111) wt_ptr = wt_ptr + 1;
-                else wt_ptr=1;
-            end 
-            else begin
-                oROB_nick_en    = 1'b0;
-                oROB_nick       = 0;
-                oROB_nick_regnm = 0;
+            if(iDP_nick_en&&!full) begin
+                oDP_nick_en = 1'b1;
+                oDP_nick = rd_ptr;
+                if(wt_ptr!=5')wt_ptr = wt_nx_ptr;
             end
-        end else begin
-            oINF_full       = 0;
-            oROB_nick_en    = 1'b0;
-            oROB_nick       = 0;
-            oROB_nick_regnm = 0;
         end
     end
 
@@ -104,7 +89,7 @@ module rob (
             for(i = 0; i < `RobNum; i = i + 1) begin
                 regnm[i] <= 0;
                 dt[i]    <= 0;
-                commit[i]<= 1'b0;
+                commit[i]     <= 1'b0;
                 j_pc[i]  <= 0;
                 ac[i]    <= `NotJump;
                 pd[i]    <= `NotJump;
@@ -120,9 +105,8 @@ module rob (
         else if (rdy) begin
 
             if(iDP_en) begin
-                regnm[iDP_rd_nick]    <= iDP_rd_regnm;
                 occupied[iDP_rd_nick] <= 1'b1;
-                pd[iDP_rd_nick]       <= iDP_pd;
+                pd[iDP_rd_nick] <= iDP_pd;
                 case(iDP_op) 
                 `SB,
                 `SH,

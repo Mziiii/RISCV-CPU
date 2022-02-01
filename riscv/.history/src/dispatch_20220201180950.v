@@ -5,7 +5,7 @@ module dispatch (
     input wire rst,
     input wire rdy,
 
-    //from ROB to get rd_nick
+    //from ROB  to get rd_nick
     input wire            iROB_nick_en,
     input wire [`NickBus] iROB_nick,
 

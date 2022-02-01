@@ -11,19 +11,15 @@ module decoder (//ind
     input wire [`AddrBus] iINF_pc,
     input wire            iINF_pd,
 
-    //rob ->to send 
-    output reg            oROB_en,
-    output reg [`NameBus] oROB_rd_regnm,
-
-    //regfile -> to send rs1_regnick & rs2_regnick
-    output reg            oRF_en,
-    output reg [`NameBus] oRF_rs1_regnm,
-    output reg [`NameBus] oRF_rs2_regnm,
-    output reg [`NameBus] oRF_rd_regnm,
-    output reg [`OpBus]   oRF_op,
-    output reg [`AddrBus] oRF_pc,
-    output reg [`ImmBus]  oRF_imm,
-    output reg            oRF_pd
+    //regfile
+    output reg            oDP_en,
+    output reg [`NameBus] oDP_rs1_regnm,
+    output reg [`NameBus] oDP_rs2_regnm,
+    output reg [`NameBus] oDP_rd_regnm,
+    output reg [`OpBus]   oDP_op,
+    output reg [`AddrBus] oDP_pc,
+    output reg [`ImmBus]  oDP_imm,
+    output reg            oDP_pd
 );
     
     wire [6:0] opcode = iINF_inst[6:0];
@@ -32,195 +28,189 @@ module decoder (//ind
     
     always @(*) begin
         if (rst) begin
-            oROB_en       = 1'b0;
-            oROB_rd_regnm = 0;
-            oRF_en        = 1'b0;
-            oRF_imm       = 0;
-            oRF_rs1_regnm = 0;
-            oRF_rs2_regnm = 0;
-            oRF_rd_regnm  = 0;
-            oRF_pd        = `NotJump;
+            oDP_en        = 1'b0;
+            oDP_imm       = 0;
+            oDP_rs1_regnm = 0;
+            oDP_rs2_regnm = 0;
+            oDP_rd_regnm  = 0;
+            oDP_pd        = `NotJump;
         end
         else if(rdy && iINF_en) begin
-            oROB_en       = 1'b1;
-            oRF_pc        = iINF_pc;
-            oRF_en        = 1'b1;
-            oRF_rs1_regnm = iINF_inst[19:15];
-            oRF_rs2_regnm = iINF_inst[24:20];
-            oRF_rd_regnm  = iINF_inst[11:7];
-            oROB_rd_regnm = iINF_inst[11:7];
-            oRF_pd        = iINF_pd;
-            case (opcode)
+            oDP_pc        = iINF_pc;
+            oDP_en        = 1'b1;
+            oDP_rs1_regnm = iINF_inst[19:15];
+            oDP_rs2_regnm = iINF_inst[24:20];
+            oDP_rd_regnm  = iINF_inst[11:7];
+            oDP_pd        = iINF_pd;
+            case (iINF_inst[6:0])
                 7'b0110111,
                 7'b0010111:begin
-                    oRF_imm[31:12] = iINF_inst[31:12];
+                    oDP_imm[31:12] = iINF_inst[31:12];
                 end
                 7'b1101111:begin
-                    oRF_imm = {{12{iINF_inst[31]}},iINF_inst[19:12],iINF_inst[20],iINF_inst[30:21],1'b0};
+                    oDP_imm = {{12{iINF_inst[31]}},iINF_inst[19:12],iINF_inst[20],iINF_inst[30:21],1'b0};
                 end
                 7'b1100011:begin
-                    oRF_imm = {{20{iINF_inst[31]}},iINF_inst[7],iINF_inst[30:25],iINF_inst[11:8],1'b0};
+                    oDP_imm = {{20{iINF_inst[31]}},iINF_inst[7],iINF_inst[30:25],iINF_inst[11:8],1'b0};
                 end
                 7'b1100111,
                 7'b0010011,
                 7'b0000011:begin
-                    oRF_imm = {{21{iINF_inst[31]}},iINF_inst[30:20]};
+                    oDP_imm = {{21{iINF_inst[31]}},iINF_inst[30:20]};
                 end
                 7'b0100011:begin
-                    oRF_imm = {{21{iINF_inst[31]}},iINF_inst[30:25],iINF_inst[11:7]};
+                    oDP_imm = {{21{iINF_inst[31]}},iINF_inst[30:25],iINF_inst[11:7]};
                 end
                 default;
             endcase
             case (opcode)
                 7'b0110111:begin
-                    oRF_op = `LUI;
+                    oDP_op = `LUI;
                 end
                 7'b0010111:begin
-                    oRF_op = `AUIPC;
+                    oDP_op = `AUIPC;
                 end
                 7'b1101111:begin
-                    oRF_op = `JAL;
+                    oDP_op = `JAL;
                 end
                 7'b1100111:begin
-                    oRF_op = `JALR;
+                    oDP_op = `JALR;
                 end
                 7'b1100011:begin
                     case (funct3)
                         3'b000:begin
-                            oRF_op = `BEQ;
+                            oDP_op = `BEQ;
                         end
                         3'b001:begin
-                            oRF_op = `BNE;
+                            oDP_op = `BNE;
                         end
                         3'b100:begin
-                            oRF_op = `BLT;
+                            oDP_op = `BLT;
                         end
                         3'b101:begin
-                            oRF_op = `BGE;
+                            oDP_op = `BGE;
                         end
                         3'b110:begin
-                            oRF_op = `BLTU;
+                            oDP_op = `BLTU;
                         end
                         3'b111:begin
-                            oRF_op = `BGEU;
+                            oDP_op = `BGEU;
                         end
                         default:begin
-                            oRF_op = `NOP;
+                            oDP_op = `NOP;
                         end
                     endcase
                 end
                 7'b0000011:begin
                     case(funct3)
                         3'b000:begin
-                            oRF_op = `LB;
+                            oDP_op = `LB;
                         end
                         3'b001:begin
-                            oRF_op = `LH;
+                            oDP_op = `LH;
                         end
                         3'b010:begin
-                            oRF_op = `LW;
+                            oDP_op = `LW;
                         end
                         3'b100:begin
-                            oRF_op = `LBU;
+                            oDP_op = `LBU;
                         end
                         3'b101:begin
-                            oRF_op = `LHU;
+                            oDP_op = `LHU;
                         end
                         default:begin
-                            oRF_op = `NOP;
+                            oDP_op = `NOP;
                         end
                     endcase
                 end
                 7'b0100011:begin
                     case(funct3)
                         3'b000:begin
-                            oRF_op = `SB;
+                            oDP_op = `SB;
                         end
                         3'b001:begin
-                            oRF_op = `SH;
+                            oDP_op = `SH;
                         end
                         3'b010:begin
-                            oRF_op = `SW;
+                            oDP_op = `SW;
                         end
                         default:begin
-                            oRF_op = `NOP;
+                            oDP_op = `NOP;
                         end
                     endcase
                 end
                 7'b0010011:begin
                     case(funct)
                         4'b0000:begin
-                            oRF_op = `ADDI;
+                            oDP_op = `ADDI;
                         end
                         4'b0010:begin
-                            oRF_op = `SLTI;
+                            oDP_op = `SLTI;
                         end
                         4'b0011:begin
-                            oRF_op = `SLTIU;
+                            oDP_op = `SLTIU;
                         end
                         4'b0100:begin
-                            oRF_op = `XORI;
+                            oDP_op = `XORI;
                         end
                         4'b0110:begin
-                            oRF_op = `ORI;
+                            oDP_op = `ORI;
                         end
                         4'b0111:begin
-                            oRF_op = `ANDI;
+                            oDP_op = `ANDI;
                         end
                         4'b0101:begin
-                            oRF_op = `SRLI;
+                            oDP_op = `SRLI;
                         end
                         4'b1101:begin
-                            oRF_op = `SRAI;
+                            oDP_op = `SRAI;
                         end
                         default:begin
-                            oRF_op = `NOP;
+                            oDP_op = `NOP;
                         end
                     endcase
                 end
                 7'b0110011:begin
                     case(funct)
                         4'b0000:begin
-                            oRF_op = `ADD;
+                            oDP_op = `ADD;
                         end
                         4'b1000:begin
-                            oRF_op = `SUB;
+                            oDP_op = `SUB;
                         end
                         4'b0001:begin
-                            oRF_op = `SLL;
+                            oDP_op = `SLL;
                         end
                         4'b0010:begin
-                            oRF_op = `SLT;
+                            oDP_op = `SLT;
                         end
                         4'b0011:begin
-                            oRF_op = `SLTU;
+                            oDP_op = `SLTU;
                         end
                         4'b0100:begin
-                            oRF_op = `XOR;
+                            oDP_op = `XOR;
                         end
                         4'b0101:begin
-                            oRF_op = `SRL;
+                            oDP_op = `SRL;
                         end
                         4'b1101:begin
-                            oRF_op = `SRA;
+                            oDP_op = `SRA;
                         end
                         4'b0110:begin
-                            oRF_op = `OR;
+                            oDP_op = `OR;
                         end
                         4'b0111:begin
-                            oRF_op = `AND;
+                            oDP_op = `AND;
                         end
                         default:begin
-                            oRF_op = `NOP;
+                            oDP_op = `NOP;
                         end
                     endcase
                 end
                 default:begin
-                    oRF_op = `NOP;
+                    oDP_op = `NOP;
                 end
             endcase
-        end else begin
-            oRF_en = 1'b0;
         end
     end
     
