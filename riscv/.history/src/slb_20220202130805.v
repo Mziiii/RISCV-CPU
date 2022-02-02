@@ -59,14 +59,14 @@
     reg [`ImmBus]    imm[`SLBNumBus];//add imm when rs1/rs2 rdy
     reg [`NickBus]   rs1_nick[`SLBNumBus];
     reg [`NickBus]   rs2_nick[`SLBNumBus];
-    reg [`DataBus]   rs1_dt[`SLBNumBus];
-    reg [`DataBus]   rs2_dt[`SLBNumBus];
+    reg [`DataBus] rs1_dt[`SLBNumBus];
+    reg [`DataBus] rs2_dt[`SLBNumBus];
     //get fifo works/moves
     reg [`SLBNumBus] rs1_valid,rs2_valid;
     
     wire empty = &(~occupied);
     wire full = &occupied;
-    wire valid = |(occupied & rs1_valid & rs2_valid);
+    wire valid = |(occupied&rs1_valid&rs2_valid);
     //
     wire [`RSBus] idx = iDP_rd_nick;
     
