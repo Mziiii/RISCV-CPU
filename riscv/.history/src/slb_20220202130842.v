@@ -66,7 +66,7 @@
     
     wire empty = &(~occupied);
     wire full = &occupied;
-    wire valid = |(occupied & rs1_valid & rs2_valid);
+    wire valid = |(occupied &rs1_valid&rs2_valid);
     //
     wire [`RSBus] idx = iDP_rd_nick;
     

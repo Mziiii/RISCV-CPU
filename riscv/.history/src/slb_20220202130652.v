@@ -54,19 +54,19 @@
     
     //contents in fifo
     reg [`SLBNumBus] occupied;
-    reg              ls[`SLBNumBus];//0 l 1 s
-    reg [`OpBus]     op[`SLBNumBus];//
-    reg [`ImmBus]    imm[`SLBNumBus];//add imm when rs1/rs2 rdy
-    reg [`NickBus]   rs1_nick[`SLBNumBus];
-    reg [`NickBus]   rs2_nick[`SLBNumBus];
-    reg [`DataBus]   rs1_dt[`SLBNumBus];
-    reg [`DataBus]   rs2_dt[`SLBNumBus];
+    reg            ls[`SLBNumBus];//0 l 1 s
+    reg [`OpBus]   op[`SLBNumBus];//
+    reg [`ImmBus]  imm[`SLBNumBus];//add imm when rs1/rs2 rdy
+    reg [`NickBus] rs1_nick[`SLBNumBus];
+    reg [`NickBus] rs2_nick[`SLBNumBus];
+    reg [`DataBus] rs1_dt[`SLBNumBus];
+    reg [`DataBus] rs2_dt[`SLBNumBus];
     //get fifo works/moves
     reg [`SLBNumBus] rs1_valid,rs2_valid;
     
     wire empty = &(~occupied);
     wire full = &occupied;
-    wire valid = |(occupied & rs1_valid & rs2_valid);
+    wire valid = |(occupied&rs1_valid&rs2_valid);
     //
     wire [`RSBus] idx = iDP_rd_nick;
     
@@ -148,6 +148,7 @@
                 rs2_dt[iDC_nick]    <= 0;
                 imm[iDC_nick]       <= 0;
                 op[iDC_nick]        <= 0;
+                pc[iDC_nick]        <= 0;
                 ls[iDC_nick]        <= 0;
             end
 
@@ -177,6 +178,7 @@
                         rs2_dt[iROB_store_nick]    <= 0;
                         imm[iROB_store_nick]       <= 0;
                         op[iROB_store_nick]        <= 0;
+                        pc[iROB_store_nick]        <= 0;
                         ls[iROB_store_nick]        <= 0;
                         occupied[iROB_store_nick]  <= 1'b0;
                     end else begin
@@ -220,6 +222,7 @@
                 `LW:begin
                     occupied[idx]  <= 1'b1;
                     op[idx]        <= iDP_op;
+                    pc[idx]        <= iDP_pc;
                     imm[idx]       <= iDP_imm;
                     rs1_nick[idx]  <= iDP_rs1_nick;
                     rs2_nick[idx]  <= iDP_rs2_nick;
