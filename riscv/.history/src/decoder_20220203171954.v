@@ -53,7 +53,7 @@ module decoder (//ind
             case (opcode)
                 7'b0110111,
                 7'b0010111:begin
-                    oRF_imm = {iINF_inst[31:12],{12{1'b0}}};
+                    oRF_imm[31:12] = iINF_inst[31:12];
                 end
                 7'b1101111:begin
                     oRF_imm = {{12{iINF_inst[31]}},iINF_inst[19:12],iINF_inst[20],iINF_inst[30:21],1'b0};
@@ -232,6 +232,7 @@ module decoder (//ind
             oRF_en = 1'b0;
             oROB_en = 1'b0;
             oRF_imm = 0;
+            oRF_op = 0
         end
     end
     
