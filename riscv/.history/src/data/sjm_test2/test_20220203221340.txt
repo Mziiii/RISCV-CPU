@@ -1,0 +1,134 @@
+00000000 <.rom>:
+   0:	00020137          	lui	sp,0x20
+1                            $   sp(x2)->0x20000/131072   $
+   4:	0b0010ef          	jal	ra,10b4 <main>
+2                            $   pc:4->pc(4)+=offset(0x10b0)->pc=0x10b4      ra(x1)->pc(4)+4:0x8  $
+   8:	0ff00513          	li	a0,255
+   c:	000306b7          	lui	a3,0x30
+  10:	00a68223          	sb	a0,4(a3) # 30004 <__heap_start+0x2e004>
+  14:	ff9ff06f          	j	c <__divsi3-0xff4>
+
+Disassembly of section .text:
+
+00001000 <__divsi3>:
+    1000:	06054063          	bltz	a0,1060 <__umodsi3+0x10>
+    1004:	0605c663          	bltz	a1,1070 <__umodsi3+0x20>
+
+00001008 <__udivsi3>:
+    1008:	00058613          	mv	a2,a1
+21                                $   rd:a2(x12) rs1:a1(x11:10) imm:0 a2(x11)->10   $
+    100c:	00050593          	mv	a1,a0
+22                                $   rd:a1(x11) rs1:a0(x10:0x3e8) imm:0 a1(x11)->0x3e8   $
+    1010:	fff00513          	li	a0,-1
+23                                $   a0(x10):0x3e8->zero(x0)+imm(-1)->a0(x10):-1   $
+    1014:	02060c63          	beqz	a2,104c <__udivsi3+0x44> if == 0 -> 0x104c
+24                                $   imm:38/0x38  $
+    1018:	00100693          	li	a3,1
+25                                $   a3(x13):0->zero(x0)+imm(1)->a3(x13):3   $
+    101c:	00b67a63          	bgeu	a2,a1,1030 <__udivsi3+0x28> >= ->
+    1020:	00c05863          	blez	a2,1030 <__udivsi3+0x28>
+    1024:	00161613          	slli	a2,a2,0x1
+    1028:	00169693          	slli	a3,a3,0x1
+    102c:	feb66ae3          	bltu	a2,a1,1020 <__udivsi3+0x18>
+    1030:	00000513          	li	a0,0
+    1034:	00c5e663          	bltu	a1,a2,1040 <__udivsi3+0x38>
+    1038:	40c585b3          	sub	a1,a1,a2
+    103c:	00d56533          	or	a0,a0,a3
+    1040:	0016d693          	srli	a3,a3,0x1
+    1044:	00165613          	srli	a2,a2,0x1
+    1048:	fe0696e3          	bnez	a3,1034 <__udivsi3+0x2c>
+    104c:	00008067          	ret
+
+00001050 <__umodsi3>:
+    1050:	00008293          	mv	t0,ra
+    1054:	fb5ff0ef          	jal	ra,1008 <__udivsi3>
+    1058:	00058513          	mv	a0,a1
+    105c:	00028067          	jr	t0
+    1060:	40a00533          	neg	a0,a0
+    1064:	00b04863          	bgtz	a1,1074 <__umodsi3+0x24>
+    1068:	40b005b3          	neg	a1,a1
+    106c:	f9dff06f          	j	1008 <__udivsi3>
+    1070:	40b005b3          	neg	a1,a1
+    1074:	00008293          	mv	t0,ra
+    1078:	f91ff0ef          	jal	ra,1008 <__udivsi3>
+    107c:	40a00533          	neg	a0,a0
+    1080:	00028067          	jr	t0
+
+00001084 <__modsi3>:
+    1084:	00008293          	mv	t0,ra
+17                                $   rd:t0(x5) rs1:ra(x1:0x10ec/4332) imm:0 t0(x5)->0x10ec/4332   $
+    1088:	0005ca63          	bltz	a1,109c <__modsi3+0x18> //rs1<zero Branch if Less Than Zero branch -> 109c
+18                                $   rs1:a1(x11:10) rs2:zero pc->nxpc imm:0x14/20 not branch $
+    108c:	00054c63          	bltz	a0,10a4 <__modsi3+0x20> //rs1<zero Branch if Less Than Zero branch -> 10a4
+19                                $   rs1:a0(x10:0x3e8) rs2:zero pc->nxpc not branch $
+    1090:	f79ff0ef          	jal	ra,1008 <__udivsi3>
+20                                $   pc:0x1090->pc(0x1090)+=offset(...)->pc=0x1008      ra(x1)->pc(1090)+4:0x1094  $
+    1094:	00058513          	mv	a0,a1
+    1098:	00028067          	jr	t0
+    109c:	40b005b3          	neg	a1,a1
+    10a0:	fe0558e3          	bgez	a0,1090 <__modsi3+0xc>
+    10a4:	40a00533          	neg	a0,a0
+    10a8:	f61ff0ef          	jal	ra,1008 <__udivsi3>
+    10ac:	40b00533          	neg	a0,a1
+    10b0:	00028067          	jr	t0
+
+Disassembly of section .text.startup:
+
+000010b4 <main>:
+    10b4:	fd010113          	addi	sp,sp,-48 # 1ffd0 <__heap_start+0x1dfd0>
+3                                $   sp(x2):0x20000/131072->sp(x2):0x1ffd0/131024  $
+    10b8:	02912223          	sw	s1,36(sp)
+4                                $   rs2:s1(x9:0) rs1:sp(0x1ffd0/131024) imm:36 dt:0 addr:0x1fff4/131060    $
+    10bc:	03212023          	sw	s2,32(sp)
+5                                $   rs2:s2(x18:0) rs1:sp(0x1ffd0/131024) imm:32 dt:0 addr:0x1fff0/131056    $
+    10c0:	01312e23          	sw	s3,28(sp)
+6                                $   rs2:s3(x19:0) rs1:sp(0x1ffd0/131024) imm:28 dt:0 addr:0x1ffec/131052    $
+    10c4:	01412c23          	sw	s4,24(sp)
+7                                $   rs2:s4(x20:0) rs1:sp(0x1ffd0/131024) imm:24 dt:0 addr:0x1ffe8/131048    $
+    10c8:	02112623          	sw	ra,44(sp)
+8                                $   rs2:ra(x1:8) rs1:sp(0x1ffd0/131024) imm:44 dt:8 addr:0x1fffc/131068    $
+    10cc:	02812423          	sw	s0,40(sp)
+9                                $   rs2:s0(x8:0) rs1:sp(0x1ffd0/131024) imm:40 dt:0 addr:0x1fff8/131064    $
+    10d0:	00000913          	li	s2,0
+10                                $   s2(x18):0->zero(x0)+imm(0)->s2(x18):0   $
+    10d4:	3e800493          	li	s1,1000
+11                                $   s1(x9):0->zero(x0)+imm(0x3e8/1000)->s1(x9):0x3e8/1000   $
+    10d8:	00410993          	addi	s3,sp,4
+12                                $   rd:s3(x19:0) rs1:sp(0x1ffd0/131024) imm:4 s3(x19)->0x1ffd4/131028    $
+    10dc:	00400a13          	li	s4,4
+13                                $   s4(x20):0->zero(x0)+imm(4)->s2(x20):4   $
+    10e0:	00a00593          	li	a1,10
+14                                $   a1(x11):0->zero(x0)+imm(10)->a1(x11):10   $
+    10e4:	00048513          	mv	a0,s1 //addi rd:10 rs1:9
+15                                $   rd:a0(x10) rs1:s1(x9:0x3e8/1000) imm:0 a0(x10)->0x3e8   $
+    10e8:	f9dff0ef          	jal	ra,1084 <__modsi3>
+16                                $   pc:0x10e8->pc(0x10e8)+=offset(-100/-0x64)->pc=0x1084      ra(x1)->pc(4)+4:0x10ec  $
+    10ec:	03050413          	addi	s0,a0,48
+    10f0:	00190913          	addi	s2,s2,1
+    10f4:	012987b3          	add	a5,s3,s2
+    10f8:	0ff47413          	zext.b	s0,s0
+    10fc:	00048513          	mv	a0,s1
+    1100:	00a00593          	li	a1,10
+    1104:	fe878fa3          	sb	s0,-1(a5)
+    1108:	ef9ff0ef          	jal	ra,1000 <__divsi3>
+    110c:	00050493          	mv	s1,a0
+    1110:	fd4918e3          	bne	s2,s4,10e0 <main+0x2c>
+    1114:	00710793          	addi	a5,sp,7
+    1118:	000306b7          	lui	a3,0x30
+    111c:	00c0006f          	j	1128 <main+0x74>
+    1120:	fff7c403          	lbu	s0,-1(a5)
+    1124:	00070793          	mv	a5,a4
+    1128:	00868023          	sb	s0,0(a3) # 30000 <__heap_start+0x2e000>
+    112c:	fff78713          	addi	a4,a5,-1
+    1130:	fef998e3          	bne	s3,a5,1120 <main+0x6c>
+    1134:	00a00793          	li	a5,10
+    1138:	00f68023          	sb	a5,0(a3)
+    113c:	02c12083          	lw	ra,44(sp)
+    1140:	02812403          	lw	s0,40(sp)
+    1144:	02412483          	lw	s1,36(sp)
+    1148:	02012903          	lw	s2,32(sp)
+    114c:	01c12983          	lw	s3,28(sp)
+    1150:	01812a03          	lw	s4,24(sp)
+    1154:	00000513          	li	a0,0
+    1158:	03010113          	addi	sp,sp,48
+    115c:	00008067          	ret
