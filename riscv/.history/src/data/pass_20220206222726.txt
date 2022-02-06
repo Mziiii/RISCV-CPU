@@ -1,0 +1,5 @@
+lvalue2 2 IO:return
+statement_test
+array_test1
+array_test2
+looper
