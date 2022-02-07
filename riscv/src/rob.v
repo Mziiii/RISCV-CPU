@@ -26,9 +26,6 @@ module rob (
     input wire [`NickBus] iDP_rd_nick,
     input wire [`NickBus] iDP_rd_regnm,
 
-    input wire [`AddrBus] iDP_pc,//todo:debug!!!!!!!!!!
-
-
     //ex
     input wire            iEX_en,
     input wire [`NickBus] iEX_nick,
@@ -180,9 +177,6 @@ module rob (
                 default;
                 endcase
 
-               //todo:debug!!!!!!!!!!!!!
-                pc[iDP_rd_nick] <= iDP_pc;
-
             end
             
             if (!empty && commit[rd_ptr]) begin
@@ -200,10 +194,6 @@ module rob (
                     ac[rd_ptr]       <= `NotJump;
                     pd[rd_ptr]       <= `NotJump;
                     ls[rd_ptr]       <= 1'b0;
-
-                    //todo:debug!!!!!!!!!!!!!
-                    pc[rd_ptr] <= 0;
-
                     //
                     rd_ptr <= rd_nx_ptr;
                 end
@@ -240,18 +230,6 @@ module rob (
             //     end
             // end
 
-            // if (control_hazard) begin
-            //     $display("control hazard at %h",pre_pc_queue[q_rd_ptr][15:0]);
-            // end
-            // $display("%b %b %b %b %b %h",control_hazard,d_empty,q_empty,wr_en_prot,isStore_input,has_value);
-            // if (rd_en_prot) begin
-            //     $display("%h %h %h",pre_pc_queue[q_rd_ptr],rob_predict_pc[q_rd_ptr],rob_npc[q_rd_ptr]);
-            //     $display("%h %h %h",commit_modify_regfile,commit_reg_addr,Commit_V);
-            //     if (commit_modify_regfile) begin
-            //         $display("%h %h",commit_reg_addr,Commit_V);
-            //     end
-            //     //$display("%d",pre_pc_queue[q_rd_ptr]);
-            // end
         end else begin
             clr <= 1'b0;
         end

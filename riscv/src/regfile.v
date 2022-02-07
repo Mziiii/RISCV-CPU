@@ -42,71 +42,6 @@ module regfile(
     reg [`DataBus] reg_dt[`RegNumBus];
     reg [`NickBus] reg_nick[`RegNumBus];
 
-//todo:debug!
-    wire [`DataBus] ra_reg_data=reg_dt[1];
-    wire [`DataBus] sp_reg_data=reg_dt[2];
-    wire [`DataBus] gp_reg_data=reg_dt[3];
-    wire [`DataBus] tp_reg_data=reg_dt[4];
-    wire [`DataBus] t0_reg_data=reg_dt[5];
-    wire [`DataBus] t1_reg_data=reg_dt[6];
-    wire [`DataBus] t2_reg_data=reg_dt[7];
-    wire [`DataBus] s0_reg_data=reg_dt[8];
-    wire [`DataBus] s1_reg_data=reg_dt[9];
-    wire [`DataBus] a0_reg_data=reg_dt[10];
-    wire [`DataBus] a1_reg_data=reg_dt[11];
-    wire [`DataBus] a2_reg_data=reg_dt[12];
-    wire [`DataBus] a3_reg_data=reg_dt[13];
-    wire [`DataBus] a4_reg_data=reg_dt[14];
-    wire [`DataBus] a5_reg_data=reg_dt[15];
-    wire [`DataBus] a6_reg_data=reg_dt[16];
-    wire [`DataBus] a7_reg_data=reg_dt[17];
-    wire [`DataBus] s2_reg_data=reg_dt[18];
-    wire [`DataBus] s3_reg_data=reg_dt[19];
-    wire [`DataBus] s4_reg_data=reg_dt[20];
-    wire [`DataBus] s5_reg_data=reg_dt[21];
-    wire [`DataBus] s6_reg_data=reg_dt[22];
-    wire [`DataBus] s7_reg_data=reg_dt[23];
-    wire [`DataBus] s8_reg_data=reg_dt[24];
-    wire [`DataBus] s9_reg_data=reg_dt[25];
-    wire [`DataBus] s10_reg_data=reg_dt[26];
-    wire [`DataBus] s11_reg_data=reg_dt[27];
-    wire [`DataBus] t3_reg_data=reg_dt[28];
-    wire [`DataBus] t4_reg_data=reg_dt[29];
-    wire [`DataBus] t5_reg_data=reg_dt[30];
-    wire [`DataBus] t6_reg_data=reg_dt[31];
-
-    wire [`NickBus] ra_reg_nick=reg_nick[1];    
-    wire [`NickBus] sp_reg_nick=reg_nick[2];
-    wire [`NickBus] gp_reg_nick=reg_nick[3];
-    wire [`NickBus] tp_reg_nick=reg_nick[4];
-    wire [`NickBus] t0_reg_nick=reg_nick[5];
-    wire [`NickBus] t1_reg_nick=reg_nick[6];
-    wire [`NickBus] t2_reg_nick=reg_nick[7];
-    wire [`NickBus] s0_reg_nick=reg_nick[8];
-    wire [`NickBus] s1_reg_nick=reg_nick[9];
-    wire [`NickBus] a0_reg_nick=reg_nick[10];
-    wire [`NickBus] a1_reg_nick=reg_nick[11];
-    wire [`NickBus] a2_reg_nick=reg_nick[12];
-    wire [`NickBus] a3_reg_nick=reg_nick[13];
-    wire [`NickBus] a4_reg_nick=reg_nick[14];
-    wire [`NickBus] a5_reg_nick=reg_nick[15];
-    wire [`NickBus] a6_reg_nick=reg_nick[16];
-    wire [`NickBus] a7_reg_nick=reg_nick[17];
-    wire [`NickBus] s2_reg_nick=reg_nick[18];
-    wire [`NickBus] s3_reg_nick=reg_nick[19];
-    wire [`NickBus] s4_reg_nick=reg_nick[20];
-    wire [`NickBus] s5_reg_nick=reg_nick[21];
-    wire [`NickBus] s6_reg_nick=reg_nick[22];
-    wire [`NickBus] s7_reg_nick=reg_nick[23];
-    wire [`NickBus] s8_reg_nick=reg_nick[24];
-    wire [`NickBus] s9_reg_nick=reg_nick[25];
-    wire [`NickBus] s10_reg_nick=reg_nick[26];
-    wire [`NickBus] s11_reg_nick=reg_nick[27];
-    wire [`NickBus] t3_reg_nick=reg_nick[28];
-    wire [`NickBus] t4_reg_nick=reg_nick[29];
-    wire [`NickBus] t5_reg_nick=reg_nick[30];
-    wire [`NickBus] t6_reg_nick=reg_nick[31];
-
     integer i;
 
     always @(*) begin
@@ -196,7 +131,7 @@ module regfile(
             end
             
             if (iROB_nick_en) begin
-                //todo:sb,sh,sw:reg_rd->not write in nick
+                //sb,sh,sw:reg_rd->not write in nick
                 case(iIND_op) 
                 `SB,
                 `SH,

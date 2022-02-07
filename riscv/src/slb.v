@@ -73,12 +73,6 @@
     
     integer i;
 
-    //todo:debug!!!!!!!!!!!
-    wire debug_ls=ls[5];
-    wire debug_occupied=occupied[5];
-    wire debug_rs1_valid=rs1_valid[5];
-    wire debug_rs2_valid=rs2_valid[5];
-
     always @(*) begin
         if(rst||clr) begin
             oINF_full = 1'b0;

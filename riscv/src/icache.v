@@ -56,6 +56,6 @@ module icache (
                     end
                 end
         end
-            end
+    end
             
-            endmodule
+endmodule
