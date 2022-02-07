@@ -44,6 +44,7 @@
     output reg [`LenBus]  oDC_len,
     output reg [`AddrBus] oDC_addr,
     output reg [`DataBus] oDC_dt,//only ST
+    output reg [`OpBus]   oDC_op,//to distinguish LBU/LHU from LB/LH
     //back LD
     input wire            iDC_done,//have data!
     input wire [`NickBus] iDC_nick,
@@ -172,22 +173,14 @@
                     oDC_addr <= rs1_dt[iROB_store_nick] + imm[iROB_store_nick];
                     oDC_dt   <= rs2_dt[iROB_store_nick];
                     oDC_nick <= iROB_store_nick;
+                    oDC_op   <= op[iROB_store_nick];
                     case (op[iROB_store_nick])
                         `SB: oDC_len <= `One;
                         `SH: oDC_len <= `Two;
                         `SW: oDC_len <=`Four;
                         default; 
                     endcase
-                    // rs1_valid[iROB_store_nick] <= 1'b0;
-                    // rs1_nick[iROB_store_nick]  <= 0;
-                    // rs1_dt[iROB_store_nick]    <= 0;
-                    // rs2_valid[iROB_store_nick] <= 1'b0;
-                    // rs2_nick[iROB_store_nick]  <= 0;
-                    // rs2_dt[iROB_store_nick]    <= 0;
-                    // imm[iROB_store_nick]       <= 0;
-                    // op[iROB_store_nick]        <= 0;
-                    // ls[iROB_store_nick]        <= 0;
-                    // occupied[iROB_store_nick]  <= 1'b0;
+
                 end
                 //load from dcache
                 else begin
@@ -198,6 +191,7 @@
                             oDC_nick <= i[`NickBus];// to guarantee i and nick with the same bits 
                             oDC_dt   <= 0;
                             oDC_addr <= rs1_dt[i] + imm[i];
+                            oDC_op   <= op[i];
                             case (op[i])
                                 `LB,
                                 `LBU: oDC_len <= `One;

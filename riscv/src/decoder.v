@@ -40,10 +40,7 @@ module decoder (//ind
             oRF_rs2_regnm = 0;
             oRF_rd_regnm  = 0;
             oRF_pd        = `NotJump;
-<<<<<<< HEAD
             oRF_op        = `NOP;
-=======
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
         end
         else if(rdy && iINF_en) begin
             oROB_en       = 1'b1;
@@ -233,7 +230,6 @@ module decoder (//ind
                 end
             endcase
         end else begin
-<<<<<<< HEAD
             oROB_en       = 1'b0;
             oROB_rd_regnm = 0;
             oRF_en        = 1'b0;
@@ -243,11 +239,6 @@ module decoder (//ind
             oRF_rd_regnm  = 0;
             oRF_pd        = `NotJump;
             oRF_op        = `NOP;
-=======
-            oRF_en = 1'b0;
-            oROB_en = 1'b0;
-            oRF_imm = 0;
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
         end
     end
     

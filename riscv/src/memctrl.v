@@ -48,12 +48,13 @@ module memctrl (
             oBP_en = 1'b0;
             oINF_inst = 0;
             oBP_inst = 0;
-        end
-        else if (iIO_buffer_full) begin
-            oINF_done = 1'b0;
-            oBP_en = 1'b0;
-            oINF_inst = 0;
-            oBP_inst = 0;
+            //todo:!!!!!!!!!!!!!!!!
+        // end
+        // else if (iIO_buffer_full) begin
+        //     oINF_done = 1'b0;
+        //     oBP_en = 1'b0;
+        //     oINF_inst = 0;
+        //     oBP_inst = 0;
         end else if (rdy) begin
             case(id_case) 
             `RInst:begin
@@ -91,9 +92,10 @@ module memctrl (
         if (rst||clr) begin
             oDC_done = 1'b0;
             oDC_dt = 0;
-        end else if (iIO_buffer_full) begin
-            oDC_done = 1'b0;
-            oDC_dt = 0;
+            //todo:!!!!!!!!!!!!!!!
+        // end else if (iIO_buffer_full) begin
+        //     oDC_done = 1'b0;
+        //     oDC_dt = 0;
         end else if (rdy) begin
             case(id_case)
             `RData:begin
@@ -137,8 +139,9 @@ module memctrl (
             oMEM_rw = `Read;
             oMEM_dt = 0;
             oMEM_addr = 0;
-        end else if (iIO_buffer_full) begin
-            oMEM_rw = `Read;
+            //todo:!!!!!!!!!!!!
+        // end else if (iIO_buffer_full) begin
+        //     oMEM_rw = `Read;
         end else if(rdy) begin
             case (id_case) 
             `Idle:begin
@@ -206,9 +209,10 @@ module memctrl (
             len <= 0;
             addr <= 0;
         end 
-        else if (iIO_buffer_full) begin
+        //todo:!!!!!!!
+        // else if (iIO_buffer_full) begin
             
-        end 
+        // end 
         else if (rdy) begin
             if (id_case == `Idle) begin
                 if (iDC_en) begin
@@ -261,12 +265,13 @@ module memctrl (
                     case (stage)
                     `Zero:begin//if stall
                         if (len == `One) stage <= `OneDone;
-                        stage <= `One;
+                        else stage <= `One;
                     end
                     `One:begin
                         if (len == `Two) stage <= `TwoDone;
-                        stage <= `Two;
+                        else begin stage <= `Two;
                         o_data[7:0] <= iMEM_dt;
+                        end
                     end
                     `Two:begin
                         stage <= `Three;

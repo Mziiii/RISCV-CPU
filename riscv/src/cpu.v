@@ -65,6 +65,7 @@ module cpu(
     wire [`DataBus] slb_dc_dt;
     wire [`LenBus] slb_dc_len;
     wire [`NickBus] slb_dc_nick;
+    wire [`OpBus] slb_dc_op;
     wire dc_slb_done;
     wire [`DataBus] dc_slb_dt;
     wire [`NickBus] dc_slb_nick;
@@ -186,6 +187,7 @@ module cpu(
     .iSLB_dt(slb_dc_dt),
     .iSLB_len(slb_dc_len),
     .iSLB_nick(slb_dc_nick),
+    .iSLB_op(slb_dc_op),
     .oSLB_done(dc_slb_done),
     .oSLB_dt(dc_slb_dt),
     .oSLB_nick(dc_slb_nick)
@@ -408,11 +410,8 @@ module cpu(
     .iDP_pd(dp_pd),
     .iDP_rd_nick(dp_rd_nick),
     .iDP_rd_regnm(dp_rd_regnm),
-<<<<<<< HEAD
 
     .iDP_pc(dp_pc),
-=======
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
     
     .iEX_en(ex_cdb_en),
     .iEX_nick(ex_cdb_nick),
@@ -506,6 +505,7 @@ module cpu(
     .oDC_len(slb_dc_len),
     .oDC_addr(slb_dc_pc),
     .oDC_dt(slb_dc_dt),
+    .oDC_op(slb_dc_op),
     
     .iDC_done(dc_slb_done),
     .iDC_nick(dc_slb_nick),

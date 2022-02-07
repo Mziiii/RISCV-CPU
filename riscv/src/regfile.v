@@ -159,7 +159,6 @@ module regfile(
                 oDP_pc       = 0;
                 oDP_pd       = 0;
                 oDP_rd_regnm = 0;
-<<<<<<< HEAD
             end
         end else begin
             oDP_en       = 1'b0;
@@ -193,65 +192,7 @@ module regfile(
                 if (iROB_rd_regnm != 0 && reg_nick[iROB_rd_regnm] == iROB_rd_nick) begin
                     reg_nick[iROB_rd_regnm] <= 0;
                     reg_dt[iROB_rd_regnm]   <= iROB_rd_dt;
-=======
-            end
-        end else begin
-            oDP_en       = 1'b0;
-            oDP_rs1_dt   = 0;
-            oDP_rs2_dt   = 0;
-            oDP_rs1_nick = 0;
-            oDP_rs2_nick = 0;
-            oDP_imm      = 0;
-            oDP_op       = 0;
-            oDP_pc       = 0;
-            oDP_pd       = 0;
-            oDP_rd_regnm = 0;
-        end
-    end
-
-    always @(posedge clk) begin
-        if(rst) begin
-            for (i = 0 ;i<`RegNum ;i = i+1) begin
-                reg_dt[i]   <= 0;
-                reg_nick[i] <= 0;
-            end
-        end else if (clr) begin
-            reg_dt[iROB_rd_regnm] = iROB_rd_dt;
-            for (i = 0 ;i<`RegNum ;i = i+1) begin
-                reg_nick[i] = 0;
-            end
-        end else if (rdy) begin
-            if (iROB_en) begin
-                if (reg_nick[iROB_rd_regnm] == iROB_rd_nick) begin
-                    reg_nick[iROB_rd_regnm] = 0;
-                    reg_dt[iROB_rd_regnm]   = iROB_rd_dt;
                 end
-            end
-            
-            if (iROB_nick_en) begin
-                //todo:sb,sh,sw:reg_rd->not write in nick
-                case(iIND_op) 
-                `SB,
-                `SH,
-                `SW,
-                `BEQ,
-                `BNE,
-                `BLT,
-                `BGE,
-                `BLTU,
-                `BGEU:begin
-                    
-                end
-                default:begin
-                    reg_nick[iROB_nick_regnm] = iROB_nick;
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
-                end
-                endcase
-            end
-        end else begin
-            for (i = 0 ;i<`RegNum ;i = i+1) begin
-                reg_dt[i]   <= 0;
-                reg_nick[i] <= 0;
             end
             
             if (iROB_nick_en) begin

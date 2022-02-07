@@ -25,6 +25,7 @@ module dcache (
     input wire [`DataBus] iSLB_dt,
     input wire [`LenBus]  iSLB_len,
     input wire [`NickBus] iSLB_nick,
+    input wire [`OpBus]   iSLB_op,
     output reg            oSLB_done,
     output reg [`DataBus] oSLB_dt,
     output reg [`NickBus] oSLB_nick
@@ -35,13 +36,10 @@ reg ls;
 reg [`AddrBus] pc;
 reg [`DataBus] dt;
 reg [`LenBus] len;
+reg [`OpBus] op;
 
     always @(*) begin
-<<<<<<< HEAD
         if(rst||clr) begin
-=======
-        if(rst) begin
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oSLB_en = 1'b1;
         end else if(rdy) begin
             oSLB_en = ~occupied;
@@ -51,11 +49,7 @@ reg [`LenBus] len;
     end
     
     always @(*) begin
-<<<<<<< HEAD
         if(rst||clr) begin
-=======
-        if(rst) begin
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oMC_en    = 1'b0;
             oMC_pc    = 0;
             oMC_ls    = 1'b0;
@@ -75,33 +69,32 @@ reg [`LenBus] len;
     end
 
     always @(*) begin
-<<<<<<< HEAD
         if(rst||clr) begin
-=======
-        if(rst) begin
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oSLB_done = 1'b0;
             oSLB_dt   = 0;
             oSLB_nick = 0;  
         end else if(rdy) begin
             if (iMC_done) begin
                 oSLB_done = 1'b1;
-                oSLB_dt   = iMC_dt;
+                case (op)
+                `LBU: oSLB_dt = {{24{1'b0}},iMC_dt[7:0]};
+                `LB: oSLB_dt = {{24{iMC_dt[7]}},iMC_dt[7:0]};
+                `LHU: oSLB_dt = {{16{1'b0}},iMC_dt[15:0]};
+                `LH: oSLB_dt = {{16{iMC_dt[7]}},iMC_dt[15:0]};
+                `LW: oSLB_dt = iMC_dt;
+                default: oSLB_dt = iMC_dt;
+                endcase
                 oSLB_nick = nick;
             end 
             else begin
                 oSLB_done = 1'b0;
-<<<<<<< HEAD
                 oSLB_dt   = 0;
                 oSLB_nick = 0;
-=======
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             end
         end
     end
 
     always @(posedge clk) begin
-<<<<<<< HEAD
         if (rst||clr) begin
             nick      <= 0;
             occupied  <= 1'b0;
@@ -109,11 +102,7 @@ reg [`LenBus] len;
             len       <= 0;
             pc        <= 0;
             dt        <= 0;
-=======
-        if (rst) begin
-            nick      <= 0;
-            occupied  <= 1'b0;
->>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
+            op        <= 0;
         end
         else if (rdy) begin
             if (iMC_done) begin
@@ -123,6 +112,7 @@ reg [`LenBus] len;
                 len       <= 0;
                 pc        <= 0;
                 dt        <= 0;
+                op        <= 0;
             end 
 
             if (iSLB_en) begin
@@ -131,6 +121,7 @@ reg [`LenBus] len;
                 pc   <= iSLB_pc;
                 dt   <= iSLB_dt;
                 nick <= iSLB_nick;
+                op   <= iSLB_op;
                 occupied <= 1'b1;
             end
         end
