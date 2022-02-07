@@ -408,8 +408,11 @@ module cpu(
     .iDP_pd(dp_pd),
     .iDP_rd_nick(dp_rd_nick),
     .iDP_rd_regnm(dp_rd_regnm),
+<<<<<<< HEAD
 
     .iDP_pc(dp_pc),
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
     
     .iEX_en(ex_cdb_en),
     .iEX_nick(ex_cdb_nick),

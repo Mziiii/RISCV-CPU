@@ -90,7 +90,11 @@ initial begin
   for (i=0;i<2**ADDR_WIDTH;i=i+1) begin
     ram[i] = 0;
   end
+<<<<<<< HEAD
   $readmemh("data/lvalue2/test.data", ram); // add test.data to vivado project or specify a valid file path
+=======
+  $readmemh("data/sjm_test2/test.data", ram); // add test.data to vivado project or specify a valid file path
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
 end
 
 endmodule

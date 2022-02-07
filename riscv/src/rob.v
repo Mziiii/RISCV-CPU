@@ -26,8 +26,11 @@ module rob (
     input wire [`NickBus] iDP_rd_nick,
     input wire [`NickBus] iDP_rd_regnm,
 
+<<<<<<< HEAD
     input wire [`AddrBus] iDP_pc,//todo:debug!!!!!!!!!!
 
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
 
     //ex
     input wire            iEX_en,
@@ -42,7 +45,11 @@ module rob (
     input wire [`DataBus] iSLB_dt,
 
     //
+<<<<<<< HEAD
     output reg            oSLB_store_en,
+=======
+    output reg            oSLB_store_en,//todo:output 
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
     output reg [`NickBus] oSLB_store_nick,
 
     //commit: write back to regfile 
@@ -72,6 +79,7 @@ module rob (
     integer i;
 
     //todo:debug!!!!!!!!!!!!!!
+<<<<<<< HEAD
     reg [`AddrBus] pc[`RobBus];
     wire debug_commit=commit[2];
     wire [`NameBus] debug_regnm=regnm[2];
@@ -80,6 +88,15 @@ module rob (
     wire debug_ac=ac[2];
     wire debug_pd=pd[2];
     wire [`AddrBus] debug_j_pc=j_pc[2];
+=======
+    wire debug_commit=commit[1];
+    wire [`NameBus] debug_regnm=regnm[1];
+    wire [`DataBus] debug_dt=dt[1];
+    wire debug_ls=ls[1];
+    wire debug_ac=ac[1];
+    wire debug_pd=pd[1];
+    wire [`AddrBus] debug_j_pc=j_pc[1];
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
 
     //dispatch and commit
     always @(*) begin
@@ -200,10 +217,13 @@ module rob (
                     ac[rd_ptr]       <= `NotJump;
                     pd[rd_ptr]       <= `NotJump;
                     ls[rd_ptr]       <= 1'b0;
+<<<<<<< HEAD
 
                     //todo:debug!!!!!!!!!!!!!
                     pc[rd_ptr] <= 0;
 
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
                     //
                     rd_ptr <= rd_nx_ptr;
                 end
@@ -211,7 +231,11 @@ module rob (
                 clr <= 1'b0;
             end
 
+<<<<<<< HEAD
             if (iEX_en && commit[iEX_nick] == 1'b0) begin
+=======
+            if (iEX_en) begin
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
                 dt[iEX_nick]     <= iEX_dt;
                 ac[iEX_nick]     <= iEX_ac;
                 commit[iEX_nick] <= 1'b1;
@@ -232,6 +256,7 @@ module rob (
                 commit[iSLB_nick]  <= 1'b1;
             end
 
+<<<<<<< HEAD
             // //todo:debug!!!!!!!!!!
             // if (!empty && commit[rd_ptr]) begin
             //     $display("%h",pc[rd_ptr][15:0]);
@@ -252,6 +277,8 @@ module rob (
             //     end
             //     //$display("%d",pre_pc_queue[q_rd_ptr]);
             // end
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
         end else begin
             clr <= 1'b0;
         end

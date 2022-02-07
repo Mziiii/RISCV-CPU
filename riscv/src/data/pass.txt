@@ -1,7 +1,10 @@
 lvalue2 2 IO:return
+<<<<<<< HEAD
 statement_test
 array_test1
 array_test2
 looper
 sjm_test1
 sjm_test2
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921

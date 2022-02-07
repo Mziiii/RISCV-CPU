@@ -37,7 +37,11 @@ reg [`DataBus] dt;
 reg [`LenBus] len;
 
     always @(*) begin
+<<<<<<< HEAD
         if(rst||clr) begin
+=======
+        if(rst) begin
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oSLB_en = 1'b1;
         end else if(rdy) begin
             oSLB_en = ~occupied;
@@ -47,7 +51,11 @@ reg [`LenBus] len;
     end
     
     always @(*) begin
+<<<<<<< HEAD
         if(rst||clr) begin
+=======
+        if(rst) begin
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oMC_en    = 1'b0;
             oMC_pc    = 0;
             oMC_ls    = 1'b0;
@@ -67,7 +75,11 @@ reg [`LenBus] len;
     end
 
     always @(*) begin
+<<<<<<< HEAD
         if(rst||clr) begin
+=======
+        if(rst) begin
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             oSLB_done = 1'b0;
             oSLB_dt   = 0;
             oSLB_nick = 0;  
@@ -79,13 +91,17 @@ reg [`LenBus] len;
             end 
             else begin
                 oSLB_done = 1'b0;
+<<<<<<< HEAD
                 oSLB_dt   = 0;
                 oSLB_nick = 0;
+=======
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
             end
         end
     end
 
     always @(posedge clk) begin
+<<<<<<< HEAD
         if (rst||clr) begin
             nick      <= 0;
             occupied  <= 1'b0;
@@ -93,6 +109,11 @@ reg [`LenBus] len;
             len       <= 0;
             pc        <= 0;
             dt        <= 0;
+=======
+        if (rst) begin
+            nick      <= 0;
+            occupied  <= 1'b0;
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
         end
         else if (rdy) begin
             if (iMC_done) begin

@@ -121,9 +121,13 @@ Disassembly of section .text.startup:
     10f4:	012987b3          	add	a5,s3,s2
     10f8:	0ff47413          	zext.b	s0,s0
     10fc:	00048513          	mv	a0,s1
+<<<<<<< HEAD
     
     1100:	00a00593          	li	a1,10
 
+=======
+    1100:	00a00593          	li	a1,10
+>>>>>>> 7d33e0d9012a9fc01d811b5ea7939c166b55c921
     1104:	fe878fa3          	sb	s0,-1(a5)
     1108:	ef9ff0ef          	jal	ra,1000 <__divsi3>
     110c:	00050493          	mv	s1,a0
