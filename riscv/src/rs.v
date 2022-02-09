@@ -58,7 +58,7 @@ module rs (
     integer i;
     always @(posedge clk) begin
         if (rst||clr) begin
-            for (i = 0;i<`RSNum ; i = i+1) begin
+            for (i = 1;i < `RSNum ; i = i + 1) begin
                 rs1_nick[i] <= 0;
                 rs2_nick[i] <= 0;
                 rs1_dt[i]   <= 0;

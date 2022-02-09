@@ -475,7 +475,6 @@ module cpu(
     
     .iDP_en(dp_en),
     .iDP_op(dp_op),
-    .iDP_pc(dp_pc),
     .iDP_imm(dp_imm),
     .iDP_rd_nick(dp_rd_nick),
     .iDP_rs1_nick(dp_rs1_nick),

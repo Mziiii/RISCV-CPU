@@ -40,6 +40,8 @@ module bp (
                 endcase
             end
             else oINF_pd = `NotJump;
+        end else begin
+            oINF_pd = `NotJump;
         end
     end
 endmodule

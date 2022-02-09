@@ -150,7 +150,7 @@ module rob (
 
     always @(posedge clk) begin
         if (rst||iclr) begin
-            for(i = 0; i < `RobNum; i = i + 1) begin
+            for(i = 1; i < `RobNum; i = i + 1) begin
                 regnm[i] <= 0;
                 dt[i]    <= 0;
                 commit[i]<= 1'b0;

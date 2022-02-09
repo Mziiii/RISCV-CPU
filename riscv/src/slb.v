@@ -10,7 +10,6 @@
     //rob (if en absolutely can write)
     input wire            iDP_en,
     input wire [`OpBus]   iDP_op,
-    input wire [`AddrBus] iDP_pc,
     input wire [`ImmBus]  iDP_imm,
     input wire [`NickBus] iDP_rd_nick,
     input wire [`NickBus] iDP_rs1_nick,
@@ -85,7 +84,7 @@
 
     always @(posedge clk) begin
         if (rst||clr) begin
-            for (i = 0; i< `SLBNum; i = i+1) begin
+            for (i = 1; i< `SLBNum; i = i+1) begin
                 ls[i]        <= 1'b0;
                 rs1_dt[i]    <= 0;
                 rs2_dt[i]    <= 0;
