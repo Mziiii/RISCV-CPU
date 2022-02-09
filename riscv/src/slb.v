@@ -103,7 +103,7 @@
             //update
             //update from execute
             if (iEX_en) begin
-                for(i = 0;i<`RSNum;i = i+1) begin
+                for(i = 1;i < `RSNum;i = i + 1) begin
                     if (occupied[i] == 1'b1) begin
                         if (rs1_valid[i] == 1'b0 && rs1_nick[i] == iEX_nick) begin
                             rs1_valid[i] <= 1'b1;
