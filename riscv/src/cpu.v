@@ -411,9 +411,6 @@ module cpu(
     .iDP_rd_nick(dp_rd_nick),
     .iDP_rd_regnm(dp_rd_regnm),
 
-    //todo:debug!
-    .iDP_pc(dp_pc),
-
     .iEX_en(ex_cdb_en),
     .iEX_nick(ex_cdb_nick),
     .iEX_dt(ex_cdb_dt),

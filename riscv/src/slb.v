@@ -120,7 +120,7 @@
             end
             //update from SLB
             if (iSLB_en) begin
-                for (i = 0;i<`RSNum ; i = i+1) begin
+                for (i = 1; i < `RSNum ; i = i + 1) begin
                     if (occupied[i] == 1'b1) begin
                         if (rs1_valid[i] == 1'b0 && rs1_nick[i] == iSLB_nick) begin
                             rs1_valid[i] <= 1'b1;
@@ -177,7 +177,7 @@
                 end
                 //load from dcache
                 else begin
-                    for (i = `RSNum - 1; i >= 0; i = i - 1 ) begin
+                    for (i = `RSNum - 1; i > 0; i = i - 1) begin
                         if(occupied[i] && rs1_valid[i] && ls[i]==`Load) begin
                             oDC_en   <= 1'b1;
                             oDC_ls   <= `Load;

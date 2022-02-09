@@ -26,9 +26,6 @@ module rob (
     input wire [`NickBus] iDP_rd_nick,
     input wire [`NickBus] iDP_rd_regnm,
 
-    //todo:debug!
-    input wire [`AddrBus] iDP_pc,
-
     //ex
     input wire            iEX_en,
     input wire [`NickBus] iEX_nick,
@@ -71,9 +68,6 @@ module rob (
     assign wt_nx_ptr = (wt_ptr == 5'b11111) ? 1 : wt_ptr + 1;
 
     integer i;
-
-    //todo:debug!!!!!!!!!!!!!!
-    reg [`AddrBus] pc[`RobBus];
 
     //dispatch and commit
     always @(*) begin
@@ -173,9 +167,6 @@ module rob (
                 ac[i]    <= `NotJump;
                 pd[i]    <= `NotJump;
                 ls[i]    <= 1'b0;
-
-                //todo:debug!
-                pc[i]    <= 0;
             end
             occupied       <= 0;
             rd_ptr         <= 1;
@@ -194,8 +185,6 @@ module rob (
                 occupied[iDP_rd_nick] <= 1'b1;
                 pd[iDP_rd_nick]       <= iDP_pd;
 
-                //todo:debug!
-                pc[iDP_rd_nick]       <= iDP_pc;
                 case(iDP_op) 
                 `SB,
                 `SH,
@@ -225,9 +214,6 @@ module rob (
                     ls[rd_ptr]       <= 1'b0;
                     //
                     rd_ptr <= rd_nx_ptr;
-
-                    //todo:debug!
-                    pc[rd_ptr]       <= 0;
                 end
             end else begin
                 clr <= 1'b0;

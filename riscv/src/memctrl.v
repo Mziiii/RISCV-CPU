@@ -143,6 +143,8 @@ module memctrl (
             oMEM_addr = 0;
         end else if (iIO_buffer_full) begin
             oMEM_rw = `Read;
+            oMEM_dt = 0;
+            oMEM_addr = 0;
         end else if(rdy) begin
             case (id_case) 
             `Idle:begin
