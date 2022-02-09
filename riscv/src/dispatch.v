@@ -112,6 +112,18 @@ module dispatch (
                             oDP_rd_regnm = iRF_rd_regnm;
                         end
                     endcase
+                end else begin
+                    oDP_en        = 1'b0;
+                    oDP_op        = 0;
+                    oDP_pc        = 0;
+                    oDP_pd        = 1'b0;
+                    oDP_imm       = 0;
+                    oDP_rd_nick   = 0;
+                    oDP_rd_regnm  = 0;
+                    oDP_rs1_nick  = 0;
+                    oDP_rs2_nick  = 0;
+                    oDP_rs1_dt    = 0;
+                    oDP_rs2_dt    = 0;
                 end
             end else begin
                 oDP_en        = 1'b0;

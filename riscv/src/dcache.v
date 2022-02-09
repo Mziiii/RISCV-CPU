@@ -64,7 +64,17 @@ reg [`OpBus] op;
                 oMC_ls = ls;
             end else begin
                 oMC_en = 1'b0;
+                oMC_pc    = 0;
+                oMC_ls    = 1'b0;
+                oMC_len   = 0;
+                oMC_dt    = 0;
             end
+        end else begin
+            oMC_en    = 1'b0;
+            oMC_pc    = 0;
+            oMC_ls    = 1'b0;
+            oMC_len   = 0;
+            oMC_dt    = 0;
         end
     end
 
@@ -91,6 +101,10 @@ reg [`OpBus] op;
                 oSLB_dt   = 0;
                 oSLB_nick = 0;
             end
+        end else begin
+            oSLB_done = 1'b0;
+            oSLB_dt   = 0;
+            oSLB_nick = 0; 
         end
     end
 

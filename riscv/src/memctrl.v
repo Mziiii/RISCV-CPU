@@ -45,45 +45,45 @@ module memctrl (
     always @(*) begin
         if(rst||clr) begin
             oINF_done = 1'b0;
-            oBP_en = 1'b0;
+            oBP_en    = 1'b0;
             oINF_inst = 0;
-            oBP_inst = 0;
+            oBP_inst  = 0;
         end
         else if (iIO_buffer_full) begin
             oINF_done = 1'b0;
-            oBP_en = 1'b0;
+            oBP_en    = 1'b0;
             oINF_inst = 0;
-            oBP_inst = 0;
+            oBP_inst  = 0;
         end else if (rdy) begin
             case(id_case) 
             `RInst:begin
                 case (stage)
                 `Four:begin
                     oINF_done = 1'b1;
-                    oBP_en = 1'b1;
+                    oBP_en    = 1'b1;
                     oINF_inst = {iMEM_dt, o_data[23:0]};
-                    oBP_inst = {iMEM_dt, o_data[23:0]};
+                    oBP_inst  = {iMEM_dt, o_data[23:0]};
                 end
                 default:begin
                     oINF_done = 1'b0;
-                    oBP_en = 1'b0;
+                    oBP_en    = 1'b0;
                     oINF_inst = 0;
-                    oBP_inst = 0;
+                    oBP_inst  = 0;
                 end
                 endcase
             end
             default:begin
                 oINF_done = 1'b0;
-                oBP_en = 1'b0;
+                oBP_en    = 1'b0;
                 oINF_inst = 0;
-                oBP_inst = 0;
+                oBP_inst  = 0;
             end
             endcase
         end else begin
             oINF_done = 1'b0;
-            oBP_en = 1'b0;
+            oBP_en    = 1'b0;
             oINF_inst = 0;
-            oBP_inst = 0;
+            oBP_inst  = 0;
         end
     end
 
@@ -119,7 +119,11 @@ module memctrl (
             `WData:begin
                 if (len == stage + `One) begin
                     oDC_done = 1'b1;
-                end 
+                    oDC_dt = 0;
+                end else begin
+                    oDC_done = 1'b0;
+                    oDC_dt = 0;
+                end
             end
             default begin
                 oDC_done = 1'b0;

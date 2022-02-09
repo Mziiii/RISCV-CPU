@@ -26,6 +26,9 @@ module rob (
     input wire [`NickBus] iDP_rd_nick,
     input wire [`NickBus] iDP_rd_regnm,
 
+    //todo:debug!
+    input wire [`AddrBus] iDP_pc,
+
     //ex
     input wire            iEX_en,
     input wire [`NickBus] iEX_nick,
@@ -63,20 +66,14 @@ module rob (
     wire full  = &occupied;
     wire empty = !(|occupied);
     
-    wire [`NickBus] rd_nx_ptr;
-    assign rd_nx_ptr = (rd_ptr == 5'b11111)?1:rd_ptr+1;
+    wire [`NickBus] rd_nx_ptr,wt_nx_ptr;
+    assign rd_nx_ptr = (rd_ptr == 5'b11111) ? 1 : rd_ptr + 1;
+    assign wt_nx_ptr = (wt_ptr == 5'b11111) ? 1 : wt_ptr + 1;
 
     integer i;
 
     //todo:debug!!!!!!!!!!!!!!
     reg [`AddrBus] pc[`RobBus];
-    wire debug_commit=commit[2];
-    wire [`NameBus] debug_regnm=regnm[2];
-    wire [`DataBus] debug_dt=dt[2];
-    wire debug_ls=ls[2];
-    wire debug_ac=ac[2];
-    wire debug_pd=pd[2];
-    wire [`AddrBus] debug_j_pc=j_pc[2];
 
     //dispatch and commit
     always @(*) begin
@@ -85,7 +82,6 @@ module rob (
             oROB_nick_en    = 1'b0;
             oROB_nick       = 0;
             oROB_nick_regnm = 0;
-            wt_ptr          = 1;
         end 
         else if(rdy) begin
             oINF_full = full;
@@ -93,8 +89,6 @@ module rob (
                 oROB_nick_en    = 1'b1;
                 oROB_nick       = wt_ptr;
                 oROB_nick_regnm = iIND_rd_regnm;
-                if(wt_ptr!=5'b11111) wt_ptr = wt_ptr + 1;
-                else wt_ptr=1;
             end 
             else begin
                 oROB_nick_en    = 1'b0;
@@ -112,22 +106,31 @@ module rob (
     always @(*) begin
         if(rst||iclr) begin
             //output
-            oRF_en         = 1'b0;
-            oSLB_store_en  = 1'b0;
+            oRF_en          = 1'b0;
+            oSLB_store_en   = 1'b0;
+            oRF_rd_dt       = 0;
+            oRF_rd_nick     = 0;
+            oRF_rd_regnm    = 0;
+            oSLB_store_nick = 0;
         end else if(rdy) begin
             if (!empty && (commit[rd_ptr] || ls[rd_ptr])) begin
                 if (ls[rd_ptr]) begin
                     oRF_en           = 1'b0;
                     oSLB_store_en    = 1'b1;
                     oSLB_store_nick  = rd_ptr;
+
+                    oRF_rd_dt        = 0;
+                    oRF_rd_nick      = 0;
+                    oRF_rd_regnm     = 0;
                 end
                 else if (pd[rd_ptr] != ac[rd_ptr]) begin
                     oSLB_store_en    = 1'b0;
-                    oINF_j_pc        = j_pc[rd_ptr];
                     oRF_en           = 1'b1;
                     oRF_rd_dt        = dt[rd_ptr];
                     oRF_rd_nick      = rd_ptr;
                     oRF_rd_regnm     = regnm[rd_ptr];
+
+                    oSLB_store_nick  = 0;
                 end
                 else begin
                     //read from fifo when !empty
@@ -136,15 +139,27 @@ module rob (
                     oRF_rd_dt        = dt[rd_ptr];
                     oRF_rd_nick      = rd_ptr;
                     oRF_rd_regnm     = regnm[rd_ptr];
+
+                    oSLB_store_nick  = 0;
                 end
             end else begin
                 oRF_en         = 1'b0;
                 oSLB_store_en  = 1'b0;
+                
+                oRF_rd_dt       = 0;
+                oRF_rd_nick     = 0;
+                oRF_rd_regnm    = 0;
+                oSLB_store_nick = 0;
             end
         end else begin
             //output
             oRF_en         = 1'b0;
             oSLB_store_en  = 1'b0;
+
+            oRF_rd_dt       = 0;
+            oRF_rd_nick     = 0;
+            oRF_rd_regnm    = 0;
+            oSLB_store_nick = 0;
         end
     end
 
@@ -158,17 +173,29 @@ module rob (
                 ac[i]    <= `NotJump;
                 pd[i]    <= `NotJump;
                 ls[i]    <= 1'b0;
+
+                //todo:debug!
+                pc[i]    <= 0;
             end
             occupied       <= 0;
             rd_ptr         <= 1;
             clr            <= 1'b0;
+            oINF_j_pc      <= 0;
+            wt_ptr         <= 1;
         end
         else if (rdy) begin
+            //todo: to solve latch
+            if(iIND_en && !full) begin
+                wt_ptr <= wt_nx_ptr;
+            end
 
             if(iDP_en) begin
                 regnm[iDP_rd_nick]    <= iDP_rd_regnm;
                 occupied[iDP_rd_nick] <= 1'b1;
                 pd[iDP_rd_nick]       <= iDP_pd;
+
+                //todo:debug!
+                pc[iDP_rd_nick]       <= iDP_pc;
                 case(iDP_op) 
                 `SB,
                 `SH,
@@ -182,6 +209,8 @@ module rob (
             if (!empty && commit[rd_ptr]) begin
                 if (pd[rd_ptr] != ac[rd_ptr]) begin
                     clr              <= 1'b1;
+                    oINF_j_pc        <= j_pc[rd_ptr];
+
                 end
                 else begin
                     //clr when commit
@@ -196,6 +225,9 @@ module rob (
                     ls[rd_ptr]       <= 1'b0;
                     //
                     rd_ptr <= rd_nx_ptr;
+
+                    //todo:debug!
+                    pc[rd_ptr]       <= 0;
                 end
             end else begin
                 clr <= 1'b0;

@@ -41,6 +41,7 @@ module decoder (//ind
             oRF_rd_regnm  = 0;
             oRF_pd        = `NotJump;
             oRF_op        = `NOP;
+            oRF_pc        = 0;
         end
         else if(rdy && iINF_en) begin
             oROB_en       = 1'b1;
@@ -70,7 +71,7 @@ module decoder (//ind
                 7'b0100011:begin
                     oRF_imm = {{21{iINF_inst[31]}},iINF_inst[30:25],iINF_inst[11:7]};
                 end
-                default;
+                default: oRF_imm = 0;
             endcase
             case (opcode)
                 7'b0110111:begin
@@ -239,6 +240,7 @@ module decoder (//ind
             oRF_rd_regnm  = 0;
             oRF_pd        = `NotJump;
             oRF_op        = `NOP;
+            oRF_pc        = 0;
         end
     end
     
